@@ -77,7 +77,7 @@ export const registerUserController = async (req, res) => {
   }
 };
 
-import generateToken from "../utils/genrateToken.js";
+import generateToken from "../Utils/genrateToken.js";
 
 export const loginUserController = async (req, res) => {
   try {
