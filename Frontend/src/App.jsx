@@ -58,18 +58,18 @@ export default function App() {
         <Route path="/" element={<Layout />}>
 
           <Route index element={<Home />} />
-          <Route path="about" element={<About />} />
+          <Route path="/about" element={<About />} />
 
           {/* Marketplace */}
-          <Route path="marketplace" element={<Marketplace />} />
-          <Route path="product/:id" element={<ProductDetails />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
 
           {/* Doctors */}
-          <Route path="doctors" element={<Doctors />} />
+          <Route path="/doctors" element={<Doctors />} />
 
           {/* Protected */}
           <Route
-            path="dashboard"
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
@@ -78,7 +78,7 @@ export default function App() {
           />
 
           <Route
-            path="premium"
+            path="/premium"
             element={
               <ProtectedRoute>
                 <Premium />
@@ -87,7 +87,7 @@ export default function App() {
           />
 
           <Route
-            path="consultations"
+            path="/consultations"
             element={
               <ProtectedRoute>
                 <Consultations />
@@ -97,7 +97,7 @@ export default function App() {
 
           {/* Seller */}
           <Route
-            path="seller/products"
+            path="/seller/products"
             element={
               <RoleRoute allow={["seller"]}>
                 <SellerProducts />
@@ -106,7 +106,7 @@ export default function App() {
           />
 
           <Route
-            path="seller/products/new"
+            path="/seller/products/new"
             element={
               <RoleRoute allow={["seller"]}>
                 <ProductForm mode="create" />
@@ -115,7 +115,7 @@ export default function App() {
           />
 
           <Route
-            path="seller/products/:id/edit"
+            path="/seller/products/:id/edit"
             element={
               <RoleRoute allow={["seller"]}>
                 <ProductForm mode="edit" />
@@ -125,7 +125,7 @@ export default function App() {
 
           {/* Doctor */}
           <Route
-            path="doctor/profile"
+            path="/doctor/profile"
             element={
               <RoleRoute allow={["doctor"]}>
                 <DoctorProfile />
@@ -135,7 +135,7 @@ export default function App() {
 
           {/* Admin */}
           <Route
-            path="admin"
+            path="/admin"
             element={
               <AdminRoute>
                 <AdminDashboard />
@@ -144,7 +144,7 @@ export default function App() {
           />
 
           <Route
-            path="admin/users"
+            path="/admin/users"
             element={
               <AdminRoute>
                 <AdminUsers />
@@ -153,7 +153,7 @@ export default function App() {
           />
 
           <Route
-            path="admin/doctors"
+            path="/admin/doctors"
             element={
               <AdminRoute>
                 <AdminVerifyDoctors />
@@ -162,7 +162,7 @@ export default function App() {
           />
 
           <Route
-            path="admin/products"
+            path="/admin/products"
             element={
               <AdminRoute>
                 <AdminModerateProducts />
@@ -171,7 +171,7 @@ export default function App() {
           />
 
           <Route
-            path="admin/subscriptions"
+            path="/admin/subscriptions"
             element={
               <AdminRoute>
                 <AdminSubscriptions />

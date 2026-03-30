@@ -46,6 +46,7 @@ if (process.env.NODE_ENV === "development") {
 // Body parser
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
+app.use("/uploads", express.static("uploads"));
 
 // ==============================
 // ROUTES
