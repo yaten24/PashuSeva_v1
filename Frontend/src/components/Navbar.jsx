@@ -1,102 +1,98 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "../context/userContext";
-import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const { user, loading } = useUser();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const isLoggedIn = !!user;
 
-  const linkClass = ({ isActive }) =>
-    `text-base font-semibold tracking-wide transition ${
-      isActive
-        ? "text-emerald-600"
-        : "text-gray-700 hover:text-emerald-600"
-    }`;
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <header className={`sticky top-0 z-50 bg-white ${scrolled ? "shadow-sm" : ""}`}>
 
-      <div className="w-full flex items-center justify-between px-10 py-4">
+      <div className="w-full flex items-center justify-between px-6 lg:px-12 py-3">
 
-        {/* 🔥 LOGO */}
-        <NavLink to="/" className="text-2xl font-extrabold text-emerald-600">
-          PashuSeva
-        </NavLink>
+        {/* 🔥 LEFT SIDE */}
+        <div className="flex items-center gap-8">
 
-        {/* 🔥 NAV LINKS */}
-        <nav className="hidden md:flex items-center gap-8">
-          <NavLink to="/marketplace" className={linkClass}>
-            Marketplace
-          </NavLink>
-          <NavLink to="/doctors" className={linkClass}>
-            Doctors
-          </NavLink>
-          <NavLink to="/premium" className={linkClass}>
-            Premium
-          </NavLink>
-          <NavLink to="/about" className={linkClass}>
-            About
-          </NavLink>
-          <NavLink to="/contact" className={linkClass}>
-            Contact
-          </NavLink>
+          {/* LOGO */}
+          <div
+            onClick={() => navigate("/")}
+            className="text-xl font-bold text-emerald-600 cursor-pointer"
+          >
+            ApnaPashu
+          </div>
 
-          {isLoggedIn && (
-            <NavLink to="/dashboard" className={linkClass}>
-              Dashboard
+          {/* NAV LINKS */}
+          <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-700">
+            <NavLink to="/marketplace" className="hover:text-emerald-600">
+              Marketplace
             </NavLink>
-          )}
-        </nav>
+            <NavLink to="/doctors" className="hover:text-emerald-600">
+              Doctors
+            </NavLink>
+            <NavLink to="/premium" className="hover:text-emerald-600">
+              Premium
+            </NavLink>
+            <NavLink to="/contact" className="hover:text-emerald-600">
+              Contact
+            </NavLink>
+            <NavLink to="/about" className="hover:text-emerald-600">
+              About
+            </NavLink>
+          </nav>
+        </div>
 
         {/* 🔥 RIGHT SIDE */}
-        <div className="hidden md:flex items-center gap-5">
+        <div className="hidden md:flex items-center gap-4">
 
           {loading ? (
-            <div className="text-sm text-gray-400">Loading...</div>
+            <span className="text-xs text-gray-400">Loading...</span>
           ) : isLoggedIn ? (
-            <>
-              {/* 🔥 AVATAR */}
-              <div
-                onClick={() => navigate("/profile")}
-                className="flex items-center gap-3 cursor-pointer group"
-              >
-                <div className="w-9 h-9 bg-emerald-600 text-white flex items-center justify-center font-bold">
-                  {user?.name?.charAt(0)?.toUpperCase()}
-                </div>
-
-                <span className="text-sm font-semibold text-gray-700 group-hover:text-emerald-600 transition">
-                  {user?.name}
-                </span>
+            <div
+              onClick={() => navigate("/profile")}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <div className="w-9 h-9 bg-emerald-600 text-white flex items-center justify-center font-bold">
+                {user?.name?.charAt(0)?.toUpperCase()}
               </div>
-            </>
+              <span className="text-sm font-semibold text-gray-700">
+                {user?.name}
+              </span>
+            </div>
           ) : (
             <>
               {/* LOGIN */}
               <NavLink
                 to="/login"
-                className="px-6 py-2.5 text-sm font-semibold text-emerald-600 border border-emerald-500 hover:bg-emerald-50 transition"
+                className="text-sm font-semibold text-gray-700 hover:text-emerald-600"
               >
-                Login
+                Log in
               </NavLink>
 
-              {/* REGISTER */}
+              {/* SIGNUP BUTTON */}
               <NavLink
                 to="/register"
-                className="px-6 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition"
+                className="bg-black text-white px-4 py-1.5 text-sm font-semibold hover:bg-gray-900 transition"
               >
-                Get Started
+                Sign up
               </NavLink>
             </>
           )}
 
         </div>
 
-        {/* 🔥 MOBILE MENU BUTTON */}
+        {/* 🔥 MOBILE */}
         <button onClick={() => setOpen(true)} className="md:hidden">
           <Menu size={26} />
         </button>
@@ -104,56 +100,42 @@ export default function Navbar() {
       </div>
 
       {/* 🔥 MOBILE DRAWER */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            className="fixed top-0 right-0 h-full w-72 bg-white shadow-xl z-50 p-6"
-          >
+      {open && (
+        <div className="fixed inset-0 z-50 flex">
 
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold">Menu</h2>
+          <div
+            className="flex-1 bg-black/40"
+            onClick={() => setOpen(false)}
+          />
+
+          <div className="w-72 bg-white h-full p-6 border-l">
+
+            <div className="flex justify-between mb-6">
+              <h2 className="font-semibold">Menu</h2>
               <button onClick={() => setOpen(false)}>
-                <X size={24} />
+                <X size={22} />
               </button>
             </div>
 
-            <div className="flex flex-col gap-5 text-base font-semibold">
-
+            <div className="flex flex-col gap-4 text-sm font-semibold">
               <NavLink to="/marketplace">Marketplace</NavLink>
               <NavLink to="/doctors">Doctors</NavLink>
               <NavLink to="/premium">Premium</NavLink>
-              <NavLink to="/about">About</NavLink>
               <NavLink to="/contact">Contact</NavLink>
-
-              {isLoggedIn && <NavLink to="/dashboard">Dashboard</NavLink>}
+              <NavLink to="/about">About</NavLink>
 
               <hr />
 
-              {isLoggedIn ? (
-                <div
-                  onClick={() => navigate("/profile")}
-                  className="flex items-center gap-3 cursor-pointer"
-                >
-                  <div className="w-9 h-9 bg-emerald-600 text-white flex items-center justify-center font-bold">
-                    {user?.name?.charAt(0)?.toUpperCase()}
-                  </div>
-                  <span>{user?.name}</span>
-                </div>
-              ) : (
+              {!isLoggedIn && (
                 <>
-                  <NavLink to="/login">Login</NavLink>
-                  <NavLink to="/register">Register</NavLink>
+                  <NavLink to="/login">Log in</NavLink>
+                  <NavLink to="/register">Sign up</NavLink>
                 </>
               )}
-
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+          </div>
+        </div>
+      )}
     </header>
   );
 }

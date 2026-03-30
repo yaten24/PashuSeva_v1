@@ -58,18 +58,18 @@ export default function App() {
         <Route path="/" element={<Layout />}>
 
           <Route index element={<Home />} />
-          <Route path="/about" element={<About />} />
+          <Route path="about" element={<About />} />
 
           {/* Marketplace */}
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="marketplace" element={<Marketplace />} />
+          <Route path="product/:id" element={<ProductDetails />} />
 
           {/* Doctors */}
-          <Route path="/doctors" element={<Doctors />} />
+          <Route path="doctors" element={<Doctors />} />
 
           {/* Protected */}
           <Route
-            path="/dashboard"
+            path="dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
