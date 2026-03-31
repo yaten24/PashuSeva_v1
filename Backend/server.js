@@ -31,9 +31,22 @@ const app = express();
 app.use(helmet());
 
 // Enable CORS (customize in production)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://apnapashu.com",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // ⚠️ change to frontend domain in production
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // mobile apps / postman
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
