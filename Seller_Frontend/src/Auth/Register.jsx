@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Eye,
@@ -26,14 +26,69 @@ const SellerRegister = () => {
     state: "",
   });
 
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
   const [loading, setLoading] = useState(false);
+
+  // 🔥 Load States
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const res = await fetch(
+          "https://countriesnow.space/api/v0.1/countries/states",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ country: "India" }),
+          }
+        );
+        const data = await res.json();
+        setStates(data.data.states);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchStates();
+  }, []);
+
+  // 🔥 Load Cities based on State
+  const fetchCities = async (state) => {
+    try {
+      const res = await fetch(
+        "https://countriesnow.space/api/v0.1/countries/state/cities",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            country: "India",
+            state: state,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      setCities(data.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   // 🔹 Handle Input
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // 🔥 When state changes → fetch cities
+    if (name === "state") {
+      fetchCities(value);
+      setFormData((prev) => ({ ...prev, city: "" }));
+    }
   };
 
   // 🔹 Submit
@@ -43,7 +98,7 @@ const SellerRegister = () => {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/seller/register",
+        "https://api.apnapashu.com/api/seller/register",
         {
           method: "POST",
           headers: {
@@ -59,10 +114,8 @@ const SellerRegister = () => {
         throw new Error(data.message || "Registration failed");
       }
 
-      // ✅ Toast
       toast.success("Seller Registered Successfully 🚀");
 
-      // 🔄 Redirect
       setTimeout(() => {
         navigate("/seller/login");
       }, 1500);
@@ -74,17 +127,14 @@ const SellerRegister = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center relative"
+    <div className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center relative"
       style={{
         backgroundImage:
           "url('https://images.unsplash.com/photo-1556740749-887f6717d7e4')",
       }}
     >
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
-      {/* Card */}
       <motion.div
         initial={{ opacity: 0, y: 60, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -97,40 +147,73 @@ const SellerRegister = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Inputs */}
+          {/* Basic Inputs */}
           {[
             { name: "name", icon: <User size={18} />, placeholder: "Full Name", type: "text" },
             { name: "email", icon: <Mail size={18} />, placeholder: "Email", type: "email" },
             { name: "mobile", icon: <Phone size={18} />, placeholder: "Mobile Number", type: "text" },
-            { name: "city", icon: <MapPin size={18} />, placeholder: "City", type: "text" },
-            { name: "state", icon: <MapPin size={18} />, placeholder: "State", type: "text" },
           ].map((field, i) => (
-            <motion.div
-              key={i}
-              whileFocus={{ scale: 1.03 }}
-              className="flex items-center border border-white/30 px-3 py-2 bg-white/10"
-            >
-              <span className="mr-2 text-white/80">{field.icon}</span>
+            <div key={i} className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
+              <span className="mr-2">{field.icon}</span>
               <input
                 type={field.type}
                 name={field.name}
                 placeholder={field.placeholder}
-                className="w-full outline-none bg-transparent text-white placeholder-white/70"
+                className="w-full outline-none bg-transparent text-white"
                 value={formData[field.name]}
                 onChange={handleChange}
                 required
               />
-            </motion.div>
+            </div>
           ))}
+
+          {/* 🔥 State Dropdown */}
+          <div className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
+            <MapPin size={18} className="mr-2" />
+            <select
+              name="state"
+              value={formData.state}
+              onChange={handleChange}
+              className="w-full bg-transparent text-white outline-none"
+              required
+            >
+              <option value="">Select State</option>
+              {states.map((s, i) => (
+                <option key={i} value={s.name} className="text-black">
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 🔥 City Dropdown */}
+          <div className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
+            <MapPin size={18} className="mr-2" />
+            <select
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              className="w-full bg-transparent text-white outline-none"
+              required
+              disabled={!formData.state}
+            >
+              <option value="">Select City</option>
+              {cities.map((city, i) => (
+                <option key={i} value={city} className="text-black">
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Password */}
           <div className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
-            <Lock size={18} className="mr-2 text-white/80" />
+            <Lock size={18} className="mr-2" />
             <input
               type={showPassword ? "text" : "password"}
               name="password"
               placeholder="Password"
-              className="w-full outline-none bg-transparent text-white placeholder-white/70"
+              className="w-full outline-none bg-transparent text-white"
               value={formData.password}
               onChange={handleChange}
               required
@@ -141,21 +224,18 @@ const SellerRegister = () => {
           </div>
 
           {/* Submit */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-green-500 to-blue-600 py-2 font-semibold shadow-lg"
+            className="w-full bg-gradient-to-r from-green-500 to-blue-600 py-2 font-semibold"
           >
             {loading ? "Registering..." : "Register"}
-          </motion.button>
+          </button>
         </form>
 
-        {/* Footer */}
-        <p className="text-sm text-center mt-4 text-white/80">
+        <p className="text-sm text-center mt-4">
           Already have an account?{" "}
-          <Link to="/seller/login" className="text-blue-300 font-semibold">
+          <Link to="/seller/login" className="text-blue-300">
             Login
           </Link>
         </p>
