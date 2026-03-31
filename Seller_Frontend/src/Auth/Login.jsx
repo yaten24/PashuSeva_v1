@@ -31,7 +31,7 @@ const SellerLogin = () => {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/seller/login",
+        "https://api.apnapashu.com/api/seller/login",
         {
           method: "POST",
           headers: {
