@@ -40,6 +40,8 @@ import AdminRoute from "./routes/AdminRoute";
 
 // 404
 import NotFound from "./pages/NotFound";
+import Contact from "./pages/Contact";
+import SearchPage from "./pages/SearchPage";
 
 export default function App() {
   return (
@@ -59,6 +61,8 @@ export default function App() {
 
           <Route index element={<Home />} />
           <Route path="about" element={<About />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="search" element={<SearchPage />} />
 
           {/* Marketplace */}
           <Route path="marketplace" element={<Marketplace />} />
@@ -66,25 +70,27 @@ export default function App() {
 
           {/* Doctors */}
           <Route path="doctors" element={<Doctors />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="premium" element={<Premium />} />
 
           {/* Protected */}
-          <Route
+          {/* <Route
             path="dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             }
-          />
+          /> */}
 
-          <Route
+          {/* <Route
             path="/premium"
             element={
               <ProtectedRoute>
                 <Premium />
               </ProtectedRoute>
             }
-          />
+          /> */}
 
           <Route
             path="/consultations"

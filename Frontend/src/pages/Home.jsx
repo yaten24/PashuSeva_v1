@@ -60,10 +60,11 @@ export default function Home() {
 
   const [loc, setLoc] = useState("");
   const [cat, setCat] = useState("bhusa");
+  const [query, setQuery] = useState("");
 
   const allProducts = useMemo(() => safeArr(listProducts()), []);
   const allDoctors = useMemo(() => safeArr(listDoctors()), []);
-  const isAuthenticated = false
+  const isAuthenticated = false;
 
   const latestProducts = useMemo(() => {
     return allProducts
@@ -91,10 +92,19 @@ export default function Home() {
   }, [allProducts, allDoctors]);
 
   const goSearch = () => {
-    const q = new URLSearchParams();
-    if (cat) q.set("cat", cat);
-    if (loc.trim()) q.set("loc", loc.trim());
-    navigate(`/marketplace?${q.toString()}`);
+    const trimmedQuery = query.trim();
+
+    // ❌ Prevent empty search
+    if (!trimmedQuery && !cat) return;
+
+    // ✅ Build params
+    const params = new URLSearchParams();
+
+    if (trimmedQuery) params.append("q", trimmedQuery);
+    if (cat) params.append("category", cat);
+
+    // ✅ Redirect
+    navigate(`/search?${params.toString()}`);
   };
 
   // const role = user?.role;
@@ -220,14 +230,12 @@ export default function Home() {
             )}
           </div>
 
-          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* 🔥 LEFT */}
             <div className="text-white">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight">
                 Smart Livestock Marketplace <br />
-                <span className="text-emerald-200">
-                  with Doctor Consultation
-                </span>
+                <span className="text-green-200">with Doctor Consultation</span>
               </h1>
 
               <p className="mt-4 text-sm md:text-base text-white/90 max-w-xl">
@@ -237,47 +245,26 @@ export default function Home() {
               </p>
 
               {/* CTA */}
-              <div className="mt-5">
+              <div className="mt-6">
                 <PrimaryCTA />
               </div>
-
-              {/* USER INFO */}
-              {/* <div className="mt-4 text-xs md:text-sm text-white/90">
-                {isAuthenticated ? (
-                  <div>
-                    Logged in as{" "}
-                    <span className="font-bold">
-                      {user?.name || user?.phone}
-                    </span>{" "}
-                    ({roleLabel(user?.role)}) •{" "}
-                    <Link className="underline font-bold" to="/dashboard">
-                      Dashboard
-                    </Link>{" "}
-                    • Premium:{" "}
-                    <span className="font-bold">
-                      {isPremium ? "ACTIVE" : "INACTIVE"}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="text-white/80">
-                    Register now and unlock marketplace + doctor services.
-                  </div>
-                )}
-              </div> */}
             </div>
 
             {/* 🔥 RIGHT CARD */}
             <div className="w-full max-w-md lg:ml-auto">
-              <div className="bg-white/10 backdrop-blur-lg border border-white/20 p-5">
-                <h3 className="text-white font-bold text-base">Quick Search</h3>
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 shadow-xl">
+                <h3 className="text-white font-semibold text-base">
+                  Quick Search
+                </h3>
 
                 <div className="mt-4 space-y-3">
                   {/* Category */}
                   <select
                     value={cat}
                     onChange={(e) => setCat(e.target.value)}
-                    className="w-full px-3 py-2.5 text-sm bg-white text-gray-900 border outline-none focus:ring-2 focus:ring-emerald-400"
+                    className="w-full px-3 py-2.5 text-sm bg-white text-gray-900 border border-gray-200 outline-none focus:ring-2 focus:ring-green-500"
                   >
+                    <option value="">Select Category</option>
                     <option value="bhusa">Bhusa</option>
                     <option value="chara">Chara</option>
                     <option value="feed">Feed</option>
@@ -285,32 +272,27 @@ export default function Home() {
                     <option value="others">Others</option>
                   </select>
 
-                  {/* Location */}
+                  {/* Search Input */}
                   <input
-                    value={loc}
-                    onChange={(e) => setLoc(e.target.value)}
-                    placeholder="Enter location..."
-                    className="w-full px-3 py-2.5 text-sm border outline-none focus:ring-2 focus:ring-emerald-400"
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && goSearch()}
+                    placeholder="Search items (e.g. cow feed, chara...)"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 outline-none focus:ring-2 focus:ring-green-500"
                   />
 
                   {/* Button */}
                   <button
                     onClick={goSearch}
-                    className="w-full bg-gray-900 text-white py-2.5 text-sm font-bold hover:bg-black transition"
+                    className="w-full bg-green-600 text-white py-2.5 text-sm font-semibold hover:bg-green-700 transition transform hover:scale-[1.02]"
                   >
-                    Search
+                    Search Now
                   </button>
-
-                  {/* {!isAuthenticated && (
-                    <div className="text-xs text-white/80">
-                      Login required for contact
-                    </div>
-                  )} */}
                 </div>
               </div>
             </div>
           </div>
-
           {/* 🔥 STATS */}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
             {stats.map((s) => (

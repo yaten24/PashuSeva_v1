@@ -1,4 +1,5 @@
-import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const plans = [
   { key: "weekly", title: "Weekly", days: 7, price: 49 },
@@ -7,59 +8,122 @@ const plans = [
 ];
 
 export default function Premium() {
-  const { user, isPremium, activatePremium } = useAuth();
+  // ✅ Demo user state (default NOT premium)
+  const [user, setUser] = useState({
+    name: "Yatendra Singh",
+    premiumUntil: null,
+  });
+
+  const isPremium = !!user.premiumUntil;
+
+  // ✅ Activate premium
+  const activatePremium = (days) => {
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + days);
+
+    setUser({
+      ...user,
+      premiumUntil: expiry,
+    });
+
+    alert("Demo: Premium Activated ✅");
+  };
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto" }}>
-      <h1>Premium Subscription</h1>
-      <p style={{ color: "#6b7280" }}>
-        Premium unlocks unlimited seller contact + doctor consultations. [file:61]
+    <div className="max-w-6xl mx-auto px-4 py-8">
+
+      {/* 🔥 HEADER */}
+      <h1 className="text-2xl font-bold text-gray-800">
+        Premium Subscription
+      </h1>
+
+      <p className="text-sm text-gray-500 mt-2">
+        Unlock unlimited seller contact + doctor consultations.
       </p>
 
-      <div style={{ marginTop: 10, padding: 12, borderRadius: 12, border: "1px solid #e5e7eb", background: "white" }}>
-        <div style={{ fontWeight: 900 }}>Status: {isPremium ? "ACTIVE" : "INACTIVE"}</div>
-        <div style={{ color: "#6b7280", marginTop: 6, fontSize: 13 }}>
-          Valid until: {user?.premiumUntil ? new Date(user.premiumUntil).toLocaleString() : "Not active"}
+      {/* 🔥 STATUS */}
+      <div className="mt-4 bg-white border border-gray-200 p-4 shadow-sm flex items-center justify-between">
+
+        <div>
+          <p className="font-semibold text-gray-800">
+            Status:
+            <span className={`ml-2 ${isPremium ? "text-green-600" : "text-red-500"}`}>
+              {isPremium ? "ACTIVE" : "INACTIVE"}
+            </span>
+          </p>
+
+          <p className="text-xs text-gray-500 mt-1">
+            Valid until:{" "}
+            {user.premiumUntil
+              ? new Date(user.premiumUntil).toLocaleString()
+              : "Not active"}
+          </p>
+        </div>
+
+        <div className="text-2xl">
+          {isPremium ? (
+            <FaCheckCircle className="text-green-600" />
+          ) : (
+            <FaTimesCircle className="text-red-500" />
+          )}
         </div>
       </div>
 
-      <div style={{ marginTop: 16, display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+      {/* 🔥 UPGRADE BANNER */}
+      {!isPremium && (
+        <div className="mt-6 bg-gradient-to-r from-green-600 to-green-700 text-white p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+
+          <div>
+            <h2 className="text-lg font-bold">
+              Upgrade to Premium 
+            </h2>
+            <p className="text-sm mt-1 text-white/90">
+              Contact sellers directly & consult doctors without limits.
+            </p>
+          </div>
+
+          <img
+            src="https://source.unsplash.com/300x200/?farm,cattle"
+            alt="premium"
+            className="w-32 h-20 object-cover border border-white/20"
+          />
+        </div>
+      )}
+
+      {/* 🔥 PLANS */}
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
         {plans.map((p) => (
-          <div key={p.key} style={card}>
-            <div style={{ fontWeight: 900, fontSize: 16 }}>{p.title}</div>
-            <div style={{ marginTop: 6, color: "#6b7280", fontSize: 13 }}>{p.days} days access</div>
-            <div style={{ marginTop: 10, fontWeight: 900, color: "#065f46", fontSize: 18 }}>₹{p.price}</div>
+          <div
+            key={p.key}
+            className="bg-white border border-gray-200 p-5 shadow-sm hover:shadow-md transition"
+          >
+            <h3 className="font-bold text-lg text-gray-800">
+              {p.title}
+            </h3>
+
+            <p className="text-sm text-gray-500 mt-1">
+              {p.days} days access
+            </p>
+
+            <p className="text-green-600 font-bold text-xl mt-2">
+              ₹{p.price}
+            </p>
 
             <button
-              style={primaryBtn}
-              onClick={() => {
-                // Demo payment success (UPI integration later)
-                activatePremium(p.key);
-                alert("Demo: Payment success. Premium activated.");
-              }}
+              onClick={() => activatePremium(p.days)}
+              className="mt-4 w-full bg-green-600 text-white py-2 text-sm font-semibold hover:bg-green-700 transition"
             >
               Pay via UPI (Demo)
             </button>
 
-            <div style={{ marginTop: 8, fontSize: 12, color: "#6b7280" }}>
-              Gateway later: UPI integration + auto-expiry tracking. [file:61]
-            </div>
+            <p className="text-xs text-gray-400 mt-2">
+              Demo mode: Payment simulation only
+            </p>
           </div>
         ))}
+
       </div>
     </div>
   );
 }
-
-const card = { border: "1px solid #e5e7eb", borderRadius: 16, padding: 14, background: "white" };
-const primaryBtn = {
-  marginTop: 12,
-  width: "100%",
-  padding: "10px 12px",
-  borderRadius: 12,
-  border: "1px solid #e5e7eb",
-  background: "#111827",
-  color: "white",
-  fontWeight: 900,
-  cursor: "pointer",
-};

@@ -1,147 +1,198 @@
 import { Link } from "react-router-dom";
+import {
+  FaUserMd,
+  FaStore,
+  FaCrown,
+  FaShieldAlt,
+  FaUsers,
+  FaGlobe,
+} from "react-icons/fa";
 
 const modules = [
   {
     title: "Marketplace",
-    points: [
-      "Category-wise listings: Bhusa, Chara, Feed, Supplements, Others",
-      "Search by location",
-      "Call seller (Premium unlocks full access)",
-    ],
+    icon: FaStore,
+    desc: "Buy & sell Bhusa, Chara, Feed and more with location-based search.",
     to: "/marketplace",
   },
   {
-    title: "Doctor module",
-    points: [
-      "Doctor profile: qualification, specialization, experience, fee",
-      "Admin verification required before doctor becomes visible",
-      "Phone consultation + consultation history",
-    ],
+    title: "Doctor Consultation",
+    icon: FaUserMd,
+    desc: "Connect with verified Pashu Chikitsak for expert guidance.",
     to: "/doctors",
   },
   {
-    title: "Premium subscription",
-    points: [
-      "Plans: Weekly, Monthly, Quarterly",
-      "Unlimited contact access + doctor consult benefits",
-      "Validity auto-expiry tracking",
-    ],
+    title: "Premium Plans",
+    icon: FaCrown,
+    desc: "Unlock unlimited access, direct contact & priority services.",
     to: "/premium",
   },
   {
-    title: "Admin panel",
-    points: [
-      "Manage users",
-      "Verify doctors",
-      "Moderate products",
-      "Manage subscriptions & view reports",
-    ],
+    title: "Admin Control",
+    icon: FaShieldAlt,
+    desc: "Platform moderation and verification control.",
     to: "/admin",
   },
 ];
 
 export default function About() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
-      {/* Header */}
-      <div className="mb-5">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          About PashuSeva
-        </h1>
-        <p className="mt-2 max-w-3xl text-sm text-gray-600">
-          PashuSeva is a marketplace + veterinary consultation platform connecting buyers/farmers,
-          sellers, and animal doctors across India.
-        </p>
-      </div>
+    <div className="bg-white py-10">
 
-      {/* Hero card */}
-      <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-emerald-50 to-cyan-50 p-5">
-        <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-emerald-200/30 blur-2xl" />
-        <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-cyan-200/30 blur-2xl" />
+      {/* 🔥 HERO */}
+      <section className="bg-green-600 text-white px-4 py-4">
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-3xl md:text-5xl font-bold">
+            PashuSeva Platform
+          </h1>
 
-        <div className="relative">
-          <div className="text-sm font-semibold text-emerald-800">
-            One app • Multiple workflows
-          </div>
-          <p className="mt-2 max-w-3xl text-sm text-gray-700">
-            Bhusa/Chara/Feed marketplace + verified doctor consultation, with premium subscription for
-            full access.
+          <p className="mt-3 text-sm md:text-base opacity-90 max-w-xl mx-auto">
+            A complete digital ecosystem connecting farmers, sellers and veterinary doctors across India.
           </p>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-5 flex justify-center gap-2 flex-wrap">
             <Link
               to="/marketplace"
-              className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white"
+              className="bg-white text-green-700 px-4 py-2 text-sm font-medium"
             >
-              Open Marketplace
+              Explore Marketplace
             </Link>
+
             <Link
               to="/doctors"
-              className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900"
+              className="border border-white px-4 py-2 text-sm"
             >
               Find Doctors
             </Link>
-            <Link
-              to="/premium"
-              className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white"
-            >
-              Premium Plans
-            </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Modules */}
-      <div className="mt-6 flex items-end justify-between gap-3">
-        <h2 className="text-xl font-bold text-gray-900">Core modules</h2>
-        <span className="text-xs text-gray-500">
-          Simple UI • Large buttons • Minimal steps
-        </span>
-      </div>
+      {/* 🔥 ABOUT */}
+      <section className="max-w-6xl mx-auto px-4 py-10">
+        <div className="grid md:grid-cols-2 gap-6 items-center">
 
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {modules.map((m) => (
-          <div
-            key={m.title}
-            className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
-          >
-            <div className="text-sm font-bold text-gray-900">{m.title}</div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              What is PashuSeva?
+            </h2>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              PashuSeva is a modern agri-tech platform designed to empower farmers and livestock owners by providing marketplace and veterinary consultation services.
+            </p>
+          </div>
 
-            <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-gray-600">
-              {m.points.map((p) => (
-                <li key={p}>{p}</li>
-              ))}
-            </ul>
+          <div className="bg-gray-50 p-4 border border-gray-200">
+            <div className="flex items-center gap-2 mb-2">
+              <FaUsers className="text-green-600" />
+              <span className="text-sm font-medium">Multi-role platform</span>
+            </div>
 
-            <Link
-              to={m.to}
-              className="mt-3 inline-flex text-sm font-semibold text-emerald-700 hover:underline"
+            <div className="flex items-center gap-2 mb-2">
+              <FaGlobe className="text-green-600" />
+              <span className="text-sm font-medium">Available across India</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <FaShieldAlt className="text-green-600" />
+              <span className="text-sm font-medium">Verified ecosystem</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 🔥 MODULES */}
+      <section className="bg-gray-50 py-10 px-4">
+        <div className="max-w-6xl mx-auto">
+
+          <h2 className="text-xl font-bold text-gray-800 mb-5">
+            Core Features
+          </h2>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {modules.map((m) => (
+              <div
+                key={m.title}
+                className="bg-white p-4 border border-gray-200 shadow-sm hover:shadow-md transition"
+              >
+                <m.icon className="text-green-600 mb-2 text-lg" />
+
+                <h3 className="text-sm font-semibold text-gray-800">
+                  {m.title}
+                </h3>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  {m.desc}
+                </p>
+
+                <Link
+                  to={m.to}
+                  className="inline-block mt-2 text-green-600 text-xs font-medium"
+                >
+                  Explore →
+                </Link>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* 🔥 USERS */}
+      <section className="max-w-6xl mx-auto px-4 py-10">
+
+        <h2 className="text-xl font-bold text-gray-800 mb-5">
+          Who Can Use?
+        </h2>
+
+        <div className="grid md:grid-cols-4 gap-4">
+          {[
+            { title: "Farmers", desc: "Find feed & consult doctors." },
+            { title: "Sellers", desc: "List and manage products." },
+            { title: "Doctors", desc: "Provide consultations." },
+            { title: "Admins", desc: "Manage system." },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="bg-gray-50 p-4 border border-gray-200"
             >
-              Open →
-            </Link>
-          </div>
-        ))}
-      </div>
+              <h3 className="text-sm font-semibold">{item.title}</h3>
+              <p className="text-xs text-gray-500 mt-1">{item.desc}</p>
+            </div>
+          ))}
+        </div>
 
-      {/* Roles */}
-      <div className="mt-7 flex items-end justify-between gap-3">
-        <h2 className="text-xl font-bold text-gray-900">Who is it for?</h2>
-        <span className="text-xs text-gray-500">Role-based flows</span>
-      </div>
+      </section>
 
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { t: "Buyer / Farmer", d: "Browse listings, contact sellers, consult doctors." },
-          { t: "Seller", d: "Add/edit/delete listings with price, location, contact." },
-          { t: "Animal Doctor", d: "Submit profile; after verification, receive consultations." },
-          { t: "Admin", d: "Moderation, verification, subscriptions control." },
-        ].map((x) => (
-          <div key={x.t} className="rounded-2xl border border-gray-200 bg-white p-4">
-            <div className="text-sm font-bold text-gray-900">{x.t}</div>
-            <div className="mt-2 text-sm text-gray-600">{x.d}</div>
-          </div>
-        ))}
-      </div>
+      {/* 🔥 CTA */}
+      <section className="bg-green-600 text-white py-10 px-4 text-center">
+
+        <h2 className="text-xl font-bold">
+          Start Using PashuSeva
+        </h2>
+
+        <p className="text-xs mt-1 opacity-90">
+          Join farmers and professionals across India
+        </p>
+
+        <div className="mt-4 flex justify-center gap-2 flex-wrap">
+          <Link
+            to="/register"
+            className="bg-white text-green-700 px-4 py-2 text-sm"
+          >
+            Get Started
+          </Link>
+
+          <Link
+            to="/marketplace"
+            className="border border-white px-4 py-2 text-sm"
+          >
+            Browse
+          </Link>
+        </div>
+
+      </section>
+
     </div>
   );
 }
