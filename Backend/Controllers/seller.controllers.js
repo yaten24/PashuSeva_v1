@@ -5,17 +5,33 @@ import jwt from "jsonwebtoken";
 // 🔹 Register Seller Controller
 export const registerSellerController = async (req, res) => {
   try {
-    const { name, email, password, mobile, city, state } = req.body;
+    const {
+      name,
+      email,
+      password,
+      mobile,
+      city,
+      state,
+      businessName,     // ✅ NEW
+      aadharNumber,     // ✅ NEW
+    } = req.body;
 
-    // 🔸 Basic Validation
-    if (!name || !mobile || !password) {
+    // 🔸 1. Basic Validation
+    if (
+      !name ||
+      !mobile ||
+      !password ||
+      !businessName ||
+      !aadharNumber
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Name, Mobile and Password are required",
+        message:
+          "Name, Mobile, Password, Business Name & Aadhar are required",
       });
     }
 
-    // 🔸 Email Validation (optional but recommended)
+    // 🔸 2. Email Validation
     if (email) {
       const emailRegex = /^\S+@\S+\.\S+$/;
       if (!emailRegex.test(email)) {
@@ -26,7 +42,23 @@ export const registerSellerController = async (req, res) => {
       }
     }
 
-    // 🔸 Password Length Check
+    // 🔸 3. Mobile Validation (India)
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid mobile number",
+      });
+    }
+
+    // 🔸 4. Aadhar Validation (12 digit)
+    if (!/^\d{12}$/.test(aadharNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Aadhar number",
+      });
+    }
+
+    // 🔸 5. Password Length
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
@@ -34,44 +66,54 @@ export const registerSellerController = async (req, res) => {
       });
     }
 
-    // 🔸 Check Existing Seller
+    // 🔸 6. Check Existing Seller
     const existingSeller = await Seller.findOne({
-      $or: [{ mobile }, ...(email ? [{ email }] : [])],
+      $or: [
+        { mobile },
+        ...(email ? [{ email }] : []),
+        { aadharNumber },
+      ],
     });
 
     if (existingSeller) {
       return res.status(400).json({
         success: false,
-        message: "Seller already exists with this mobile or email",
+        message:
+          "Seller already exists with this mobile/email/aadhar",
       });
     }
 
-    // 🔸 Hash Password
+    // 🔸 7. Hash Password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 🔸 Create Seller
+    // 🔸 8. Create Seller
     const seller = await Seller.create({
       name: name.trim(),
       email: email?.toLowerCase().trim(),
       mobile: mobile.trim(),
       password: hashedPassword,
+      businessName: businessName.trim(),
+      aadharNumber: aadharNumber.trim(),
       location: {
         city: city || "",
         state: state || "",
       },
+      status: "pending", // 🔥 approval system
     });
 
-    // 🔸 Response (without password)
+    // 🔸 9. Response
     return res.status(201).json({
       success: true,
-      message: "Seller registered successfully",
+      message: "Seller registered successfully. Waiting for approval.",
       seller: {
         _id: seller._id,
         name: seller.name,
         email: seller.email,
         mobile: seller.mobile,
-        role: seller.role,
+        businessName: seller.businessName,
+        city: seller.location?.city,
+        state: seller.location?.state,
         status: seller.status,
       },
     });
@@ -82,7 +124,8 @@ export const registerSellerController = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: "Duplicate field value (mobile/email already exists)",
+        message:
+          "Duplicate field value (mobile/email/aadhar already exists)",
       });
     }
 
@@ -92,7 +135,6 @@ export const registerSellerController = async (req, res) => {
     });
   }
 };
-
 export const loginSellerController = async (req, res) => {
   try {
     const { email, password } = req.body;

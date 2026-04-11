@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Eye,
-  EyeOff,
-  User,
-  Mail,
-  Lock,
-  Phone,
-  MapPin,
-} from "lucide-react";
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaPhone,
+  FaMapMarkerAlt,
+  FaBuilding,
+  FaIdCard,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 import toast from "react-hot-toast";
+
+      {/* 🔥 LEFT BRANDING */}
+      import { FaUsers, FaTools, FaShieldAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const SellerRegister = () => {
@@ -22,16 +27,16 @@ const SellerRegister = () => {
     email: "",
     mobile: "",
     password: "",
+    businessName: "",
+    aadharNumber: "",
     city: "",
     state: "",
   });
 
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-
   const [loading, setLoading] = useState(false);
 
-  // 🔥 Load States
   useEffect(() => {
     const fetchStates = async () => {
       try {
@@ -49,11 +54,9 @@ const SellerRegister = () => {
         console.log(err);
       }
     };
-
     fetchStates();
   }, []);
 
-  // 🔥 Load Cities based on State
   const fetchCities = async (state) => {
     try {
       const res = await fetch(
@@ -61,13 +64,9 @@ const SellerRegister = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            country: "India",
-            state: state,
-          }),
+          body: JSON.stringify({ country: "India", state }),
         }
       );
-
       const data = await res.json();
       setCities(data.data);
     } catch (err) {
@@ -75,50 +74,38 @@ const SellerRegister = () => {
     }
   };
 
-  // 🔹 Handle Input
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
 
-    // 🔥 When state changes → fetch cities
     if (name === "state") {
       fetchCities(value);
       setFormData((prev) => ({ ...prev, city: "" }));
     }
   };
 
-  // 🔹 Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       const res = await fetch(
-        "https://api.apnapashu.com/api/seller/register",
+        "http://localhost:5000/api/seller/register",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         }
       );
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
+      if (!res.ok) throw new Error(data.message);
 
       toast.success("Seller Registered Successfully 🚀");
 
-      setTimeout(() => {
-        navigate("/seller/login");
-      }, 1500);
+      setTimeout(() => navigate("/seller/login"), 1500);
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -127,119 +114,180 @@ const SellerRegister = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center relative"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1556740749-887f6717d7e4')",
-      }}
-    >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div className="min-h-screen flex flex-col md:flex-row">
 
-      <motion.div
-        initial={{ opacity: 0, y: 60, scale: 0.9 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative w-full max-w-lg bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl p-8 text-white"
-      >
-        <h2 className="text-3xl font-bold text-center mb-6">
-          Seller Register
-        </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+<div
+  className="hidden md:flex w-1/2 relative items-center justify-center text-white px-12"
+  style={{
+    backgroundImage: "url('/images/seller_home.jpg')", // ✅ FIXED PATH
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+>
+  {/* Overlay */}
+  <div className="absolute inset-0 bg-gradient-to-br from-green-900/80 to-black/80"></div>
 
-          {/* Basic Inputs */}
-          {[
-            { name: "name", icon: <User size={18} />, placeholder: "Full Name", type: "text" },
-            { name: "email", icon: <Mail size={18} />, placeholder: "Email", type: "email" },
-            { name: "mobile", icon: <Phone size={18} />, placeholder: "Mobile Number", type: "text" },
-          ].map((field, i) => (
-            <div key={i} className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
-              <span className="mr-2">{field.icon}</span>
+  <div className="relative z-10 max-w-md">
+
+    {/* Heading */}
+    <h1 className="text-4xl font-bold mb-4 leading-tight">
+      Grow with <span className="text-green-400">PashuSeva</span>
+    </h1>
+
+    {/* Description */}
+    <p className="text-gray-300 text-base leading-relaxed">
+      Join India’s fast-growing livestock platform designed to empower sellers,
+      veterinarians, and service providers. Expand your reach, manage your
+      services efficiently, and build a trusted digital presence.
+    </p>
+
+    {/* Features */}
+    <div className="mt-8 space-y-4">
+
+      <div className="flex items-start gap-3">
+        <FaUsers className="text-green-400 mt-1" />
+        <div>
+          <p className="font-semibold">Reach More Customers</p>
+          <p className="text-sm text-gray-400">
+            Connect with farmers across multiple cities and grow your network.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-3">
+        <FaTools className="text-green-400 mt-1" />
+        <div>
+          <p className="font-semibold">Easy Service Management</p>
+          <p className="text-sm text-gray-400">
+            Manage bookings, services, and operations from one dashboard.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-3">
+        <FaShieldAlt className="text-green-400 mt-1" />
+        <div>
+          <p className="font-semibold">Secure & Trusted Platform</p>
+          <p className="text-sm text-gray-400">
+            Verified system ensuring safety and reliability for sellers.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+      {/* 🔥 FORM */}
+      <div className="flex w-full md:w-1/2 items-center justify-center bg-gray-50 px-4 py-10">
+
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md bg-white border border-gray-200 shadow-xl p-8"
+        >
+          <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+            Seller Register
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* INPUTS */}
+            {[
+              { name: "name", icon: <FaUser />, placeholder: "Full Name" },
+              { name: "email", icon: <FaEnvelope />, placeholder: "Email" },
+              { name: "mobile", icon: <FaPhone />, placeholder: "Mobile Number" },
+              { name: "businessName", icon: <FaBuilding />, placeholder: "Business Name" },
+              { name: "aadharNumber", icon: <FaIdCard />, placeholder: "Aadhar Number" },
+            ].map((field, i) => (
+              <div
+                key={i}
+                className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600 focus-within:ring-1 focus-within:ring-green-600"
+              >
+                <span className="mr-2 text-gray-500">{field.icon}</span>
+                <input
+                  type="text"
+                  name={field.name}
+                  placeholder={field.placeholder}
+                  className="w-full outline-none text-sm"
+                  value={formData[field.name]}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            ))}
+
+            {/* STATE */}
+            <div className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600">
+              <FaMapMarkerAlt className="mr-2 text-gray-500" />
+              <select
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                className="w-full outline-none text-sm"
+                required
+              >
+                <option value="">Select State</option>
+                {states.map((s, i) => (
+                  <option key={i} value={s.name}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* CITY */}
+            <div className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600">
+              <FaMapMarkerAlt className="mr-2 text-gray-500" />
+              <select
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                className="w-full outline-none text-sm"
+                required
+              >
+                <option value="">Select City</option>
+                {cities.map((c, i) => (
+                  <option key={i} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* PASSWORD */}
+            <div className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600">
+              <FaLock className="mr-2 text-gray-500" />
               <input
-                type={field.type}
-                name={field.name}
-                placeholder={field.placeholder}
-                className="w-full outline-none bg-transparent text-white"
-                value={formData[field.name]}
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                className="w-full outline-none text-sm"
+                value={formData.password}
                 onChange={handleChange}
                 required
               />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
-          ))}
 
-          {/* 🔥 State Dropdown */}
-          <div className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
-            <MapPin size={18} className="mr-2" />
-            <select
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              className="w-full bg-transparent text-white outline-none"
-              required
+            {/* BUTTON */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-600 text-white py-2 font-semibold hover:bg-green-700 transition"
             >
-              <option value="">Select State</option>
-              {states.map((s, i) => (
-                <option key={i} value={s.name} className="text-black">
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 🔥 City Dropdown */}
-          <div className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
-            <MapPin size={18} className="mr-2" />
-            <select
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              className="w-full bg-transparent text-white outline-none"
-              required
-              disabled={!formData.state}
-            >
-              <option value="">Select City</option>
-              {cities.map((city, i) => (
-                <option key={i} value={city} className="text-black">
-                  {city}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Password */}
-          <div className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
-            <Lock size={18} className="mr-2" />
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Password"
-              className="w-full outline-none bg-transparent text-white"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-            <button type="button" onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {loading ? "Registering..." : "Register"}
             </button>
-          </div>
+          </form>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-green-500 to-blue-600 py-2 font-semibold"
-          >
-            {loading ? "Registering..." : "Register"}
-          </button>
-        </form>
+          <p className="text-sm text-center mt-4">
+            Already have an account?{" "}
+            <Link to="/seller/login" className="text-green-600 font-semibold">
+              Login
+            </Link>
+          </p>
+        </motion.div>
 
-        <p className="text-sm text-center mt-4">
-          Already have an account?{" "}
-          <Link to="/seller/login" className="text-blue-300">
-            Login
-          </Link>
-        </p>
-      </motion.div>
+      </div>
     </div>
   );
 };

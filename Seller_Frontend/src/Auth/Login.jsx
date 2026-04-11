@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import {
+  FaEnvelope,
+  FaLock,
+  FaEye,
+  FaEyeSlash,
+  FaUserCheck,
+} from "react-icons/fa";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 
@@ -16,7 +22,6 @@ const SellerLogin = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Handle Input
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -24,7 +29,6 @@ const SellerLogin = () => {
     });
   };
 
-  // 🔹 Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -34,28 +38,20 @@ const SellerLogin = () => {
         "https://api.apnapashu.com/api/seller/login",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         }
       );
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed");
-      }
+      if (!res.ok) throw new Error(data.message);
 
-      // ✅ Token Save
       localStorage.setItem("sellerToken", data.token);
 
-      toast.success("Login Successful 🎉");
+      toast.success("Login Successful 🚀");
 
-      // 🔄 Redirect
-      setTimeout(() => {
-        navigate("/seller/dashboard");
-      }, 1200);
+      setTimeout(() => navigate("/seller/dashboard"), 1200);
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -64,84 +60,101 @@ const SellerLogin = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center relative"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1526256262350-7da7584cf5eb')",
-      }}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div className="min-h-screen flex flex-col md:flex-row">
 
-      {/* 🔥 Animated Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 60, scale: 0.9 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl p-8 text-white"
+      {/* 🔥 LEFT BRANDING */}
+      <div
+        className="hidden md:flex w-1/2 relative items-center justify-center text-white px-12"
+        style={{
+          backgroundImage: "url('/images/seller_home.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
       >
-        {/* Heading */}
-        <h2 className="text-3xl font-bold text-center mb-6">
-          Seller Login
-        </h2>
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/80 to-black/80"></div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="relative z-10 max-w-md">
+          <h1 className="text-4xl font-bold mb-4 leading-tight">
+            Welcome Back to <span className="text-green-400">PashuSeva</span>
+          </h1>
 
-          {/* Email */}
-          <div className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
-            <Mail size={18} className="mr-2 text-white/80" />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              className="w-full outline-none bg-transparent text-white placeholder-white/70"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+          <p className="text-gray-300">
+            Login to manage your services, track bookings, and grow your
+            livestock business seamlessly.
+          </p>
+
+          <div className="mt-6 flex items-center gap-2 text-sm text-gray-300">
+            <FaUserCheck className="text-green-400" />
+            Trusted platform for livestock service providers
           </div>
+        </div>
+      </div>
 
-          {/* Password */}
-          <div className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
-            <Lock size={18} className="mr-2 text-white/80" />
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Password"
-              className="w-full outline-none bg-transparent text-white placeholder-white/70"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+      {/* 🔥 RIGHT FORM */}
+      <div className="flex w-full md:w-1/2 items-center justify-center bg-gray-50 px-4 py-10">
+
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md bg-white border border-gray-200 shadow-xl p-8"
+        >
+          <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+            Seller Login
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Email */}
+            <div className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600 focus-within:ring-1 focus-within:ring-green-600">
+              <FaEnvelope className="mr-2 text-gray-500" />
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                className="w-full outline-none text-sm"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Password */}
+            <div className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600">
+              <FaLock className="mr-2 text-gray-500" />
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Enter your password"
+                className="w-full outline-none text-sm"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+
+            {/* Button */}
             <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-600 text-white py-2 font-semibold hover:bg-green-700 transition"
             >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {loading ? "Logging in..." : "Login"}
             </button>
-          </div>
+          </form>
 
-          {/* Submit */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-green-500 to-blue-600 py-2 font-semibold shadow-lg"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </motion.button>
-        </form>
+          {/* Footer */}
+          <p className="text-sm text-center mt-4">
+            Don't have an account?{" "}
+            <Link to="/seller/register" className="text-green-600 font-semibold">
+              Register
+            </Link>
+          </p>
+        </motion.div>
 
-        {/* Footer */}
-        <p className="text-sm text-center mt-4 text-white/80">
-          Don't have an account?{" "}
-          <Link to="/seller/register" className="text-blue-300 font-semibold">
-            Register
-          </Link>
-        </p>
-      </motion.div>
+      </div>
     </div>
   );
 };

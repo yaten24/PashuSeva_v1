@@ -23,7 +23,6 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-import mongoose from "mongoose";
 
 const sellerSchema = new mongoose.Schema(
   {
@@ -85,16 +84,13 @@ const sellerSchema = new mongoose.Schema(
     bankDetails: {
       accountHolderName: {
         type: String,
-        required: true,
       },
       accountNumber: {
         type: String,
-        required: true,
         select: false, // 🔒 sensitive
       },
       ifscCode: {
         type: String,
-        required: true,
       },
       bankName: {
         type: String,

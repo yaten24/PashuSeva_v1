@@ -1,72 +1,156 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle, Users, Briefcase, Shield } from "lucide-react";
+import {
+  FaUsers,
+  FaBriefcase,
+  FaShieldAlt,
+  FaCheckCircle,
+} from "react-icons/fa";
+
+      import {  FaHandshake, FaChartLine } from "react-icons/fa";
 import SellerHero from "../Components/Home_Page_Comp/SellerHero";
 
 const SellerHome = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-950 text-white overflow-hidden">
 
-      {/* 🔥 HERO SECTION */}
+      {/* 🔥 HERO */}
       <SellerHero />
 
       {/* 🔥 ABOUT SECTION */}
-      <div className="py-16 px-6 max-w-6xl mx-auto">
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold text-center mb-8"
-        >
-          What is PashuSeva?
-        </motion.h2>
 
-        <p className="text-gray-600 text-center max-w-3xl mx-auto">
-          PashuSeva is a digital platform that connects livestock service providers
-          (like veterinarians, workers, and sellers) with farmers across India.
-          It helps you find more customers, manage bookings, and grow your income
-          easily through technology.
+<div className="py-24 px-6 bg-gray-900 text-white">
+  <div className="max-w-6xl mx-auto">
+
+    {/* 🔥 Heading */}
+    <div className="text-center mb-12">
+      <motion.h2
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        className="text-4xl md:text-5xl font-bold"
+      >
+        About <span className="text-green-400">PashuSeva</span>
+      </motion.h2>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="mt-6 text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed"
+      >
+        PashuSeva is a modern digital platform designed to connect livestock
+        service providers such as veterinarians, sellers, and workers with
+        farmers across India. Our mission is to simplify the livestock ecosystem
+        by providing seamless access to services, improving efficiency, and
+        enabling business growth through technology.
+      </motion.p>
+    </div>
+
+    {/* 🔥 Features */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+      {/* Feature 1 */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        className="p-6 bg-white/5 border border-white/10 text-center"
+      >
+        <div className="text-green-400 text-3xl mb-4 flex justify-center">
+          <FaUsers />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">
+          Wide Network Access
+        </h3>
+        <p className="text-gray-400 text-sm">
+          Connect with farmers and customers across multiple cities and expand your reach effortlessly.
         </p>
-      </div>
+      </motion.div>
+
+      {/* Feature 2 */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="p-6 bg-white/5 border border-white/10 text-center"
+      >
+        <div className="text-green-400 text-3xl mb-4 flex justify-center">
+          <FaHandshake />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">
+          Trusted Platform
+        </h3>
+        <p className="text-gray-400 text-sm">
+          A secure and verified ecosystem ensuring trust between service providers and farmers.
+        </p>
+      </motion.div>
+
+      {/* Feature 3 */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="p-6 bg-white/5 border border-white/10 text-center"
+      >
+        <div className="text-green-400 text-3xl mb-4 flex justify-center">
+          <FaChartLine />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">
+          Business Growth
+        </h3>
+        <p className="text-gray-400 text-sm">
+          Manage services, bookings, and earnings efficiently while growing your livestock business digitally.
+        </p>
+      </motion.div>
+
+    </div>
+
+  </div>
+</div>
 
       {/* 🔥 WHY CHOOSE US */}
-      <div className="bg-white py-16 px-6">
-        <h2 className="text-3xl font-bold text-center mb-10">
+      <div className="py-20 px-6 bg-gray-900">
+        <h2 className="text-4xl font-bold text-center mb-14">
           Why Choose PashuSeva?
         </h2>
 
-        <div className="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
 
           {[
             {
-              icon: <Users />,
+              icon: <FaUsers />,
               title: "More Customers",
-              desc: "Reach farmers across multiple cities and grow your business",
+              desc: "Reach farmers across multiple cities",
             },
             {
-              icon: <Briefcase />,
+              icon: <FaBriefcase />,
               title: "Easy Management",
-              desc: "Manage bookings, services and income from one dashboard",
+              desc: "Manage bookings & services easily",
             },
             {
-              icon: <Shield />,
+              icon: <FaShieldAlt />,
               title: "Secure Platform",
-              desc: "Safe and reliable system for both sellers and users",
+              desc: "Safe & verified ecosystem",
             },
             {
-              icon: <CheckCircle />,
+              icon: <FaCheckCircle />,
               title: "Trusted Network",
-              desc: "Be part of India's growing livestock ecosystem",
+              desc: "Growing livestock ecosystem",
             },
           ].map((item, i) => (
             <motion.div
               key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               whileHover={{ scale: 1.05 }}
-              className="p-6 border bg-gray-50 shadow-sm text-center"
+              transition={{ delay: i * 0.1 }}
+              className="p-6 bg-white/5 border border-white/10 backdrop-blur-md text-center"
             >
-              <div className="text-green-500 mb-3">{item.icon}</div>
+              <div className="text-green-400 text-2xl mb-4 flex justify-center">
+                {item.icon}
+              </div>
               <h3 className="font-semibold text-lg">{item.title}</h3>
-              <p className="text-gray-500 text-sm mt-2">{item.desc}</p>
+              <p className="text-gray-400 text-sm mt-2">{item.desc}</p>
             </motion.div>
           ))}
 
@@ -74,57 +158,78 @@ const SellerHome = () => {
       </div>
 
       {/* 🔥 HOW IT WORKS */}
-      <div className="py-16 px-6 bg-gray-100">
-        <h2 className="text-3xl font-bold text-center mb-10">
+      <div className="py-20 px-6 bg-gray-950">
+        <h2 className="text-4xl font-bold text-center mb-14">
           How It Works
         </h2>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto text-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
 
           {[
-            "Register as a Seller",
-            "Add Your Services",
-            "Start Getting Bookings",
+            {
+              title: "Register",
+              desc: "Create your seller account in minutes",
+            },
+            {
+              title: "Add Services",
+              desc: "List your services & pricing",
+            },
+            {
+              title: "Get Bookings",
+              desc: "Start receiving customer requests",
+            },
           ].map((step, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="p-6 bg-white shadow"
+              whileHover={{ scale: 1.05 }}
+              transition={{ delay: i * 0.2 }}
+              className="p-8 bg-gradient-to-br from-green-500/10 to-blue-500/10 border border-white/10 text-center"
             >
+              <div className="text-3xl font-bold text-green-400 mb-2">
+                {i + 1}
+              </div>
               <h3 className="text-xl font-semibold mb-2">
-                Step {i + 1}
+                {step.title}
               </h3>
-              <p className="text-gray-600">{step}</p>
+              <p className="text-gray-400">{step.desc}</p>
             </motion.div>
           ))}
 
         </div>
       </div>
 
-      {/* 🔥 CTA SECTION */}
-      <div className="py-16 text-center bg-gradient-to-r from-green-500 to-blue-600 text-white">
-        <h2 className="text-3xl font-bold">
-          Start Your Journey with PashuSeva
-        </h2>
-        <p className="mt-3">
-          Join now and grow your livestock business faster than ever.
+      {/* 🔥 CTA */}
+      <div className="py-20 text-center bg-gradient-to-r from-green-600 to-green-800">
+
+        <motion.h2
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          className="text-4xl font-bold"
+        >
+          Start Your Journey Today 🚀
+        </motion.h2>
+
+        <p className="mt-4 text-gray-200">
+          Join PashuSeva and grow your livestock business faster.
         </p>
 
-        <div className="mt-6 flex justify-center gap-4">
+        <div className="mt-8 flex justify-center gap-4">
           <Link
             to="/seller/register"
-            className="px-6 py-3 bg-white text-black font-semibold hover:scale-105 transition"
+            className="px-8 py-3 bg-white text-black font-semibold hover:scale-105 transition"
           >
             Get Started
           </Link>
           <Link
             to="/seller/login"
-            className="px-6 py-3 border border-white hover:scale-105 transition"
+            className="px-8 py-3 border border-white hover:bg-white hover:text-black transition"
           >
             Login
           </Link>
         </div>
+
       </div>
 
     </div>
