@@ -49,14 +49,21 @@ const doctorSchema = new mongoose.Schema(
       select: false, // security
     },
 
-    phone: String,
-
-    profileImage: String,
-
     // 🔹 Specialization
     specialization: {
       type: String,
       required: true, // e.g. Veterinary
+    },
+
+     qualification: {
+      type: String,
+      required: true, // e.g. BVSc & AH
+    },
+
+     registrationNumber: {
+      type: String,
+      required: true,
+      unique: true,
     },
 
     experience: {
@@ -67,6 +74,27 @@ const doctorSchema = new mongoose.Schema(
     consultationFee: {
       type: Number,
       required: true,
+    },
+
+    location: {
+      city: String,
+      state: String,
+    },
+
+    // Admin Approval System
+    adminApproval: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+
+    approvedAt: {
+      type: Date,
+    },
+
+    rejectionReason: {
+      type: String,
+      default: "",
     },
 
     // 🔹 Rating

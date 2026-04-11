@@ -294,7 +294,7 @@ export default function Home() {
             </div>
           </div>
           {/* 🔥 STATS */}
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
             {stats.map((s) => (
               <div
                 key={s.label}
@@ -304,7 +304,7 @@ export default function Home() {
                 <div className="text-xs text-white/80">{s.label}</div>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
 

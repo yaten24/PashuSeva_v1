@@ -1,5 +1,68 @@
 import mongoose from "mongoose";
 
+const addressSchema = new mongoose.Schema(
+  {
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    mobile: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    pincode: {
+      type: String,
+      required: true,
+    },
+
+    state: {
+      type: String,
+      required: true,
+    },
+
+    district: {
+      type: String,
+      required: true,
+    },
+
+    city: {
+      type: String,
+      required: true,
+    },
+
+    area: {
+      type: String,
+      required: true,
+    },
+
+    landmark: {
+      type: String,
+      default: "",
+    },
+
+    addressLine: {
+      type: String,
+      required: true,
+    },
+
+    addressType: {
+      type: String,
+      enum: ["home", "work", "other"],
+      default: "home",
+    },
+
+    isDefault: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { timestamps: true }
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -37,9 +100,22 @@ const userSchema = new mongoose.Schema(
     },
 
     location: {
-      city: String,
+      district: String,
       state: String,
     },
+
+    // ✅ NEW: Aadhar Number
+    aadharNumber: {
+      type: String,
+      unique: true,
+      sparse: true,
+      minlength: 12,
+      maxlength: 12,
+      select: false, // 🔒 sensitive data
+    },
+
+    // ✅ NEW: Multiple Delivery Addresses
+    addresses: [addressSchema],
 
     isVerified: {
       type: Boolean,

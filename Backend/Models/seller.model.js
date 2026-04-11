@@ -23,6 +23,8 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
+import mongoose from "mongoose";
+
 const sellerSchema = new mongoose.Schema(
   {
     // 🔹 Basic Info
@@ -35,6 +37,7 @@ const sellerSchema = new mongoose.Schema(
     email: {
       type: String,
       unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
     },
@@ -50,7 +53,7 @@ const sellerSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      select: false, // security
+      select: false,
     },
 
     profileImage: {
@@ -65,9 +68,48 @@ const sellerSchema = new mongoose.Schema(
       default: "seller",
     },
 
+    // 🔹 Business Info (NEW)
+    businessName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // 🔹 Location
     location: {
       city: String,
       state: String,
+    },
+
+    // 🔹 Bank Details (NEW)
+    bankDetails: {
+      accountHolderName: {
+        type: String,
+        required: true,
+      },
+      accountNumber: {
+        type: String,
+        required: true,
+        select: false, // 🔒 sensitive
+      },
+      ifscCode: {
+        type: String,
+        required: true,
+      },
+      bankName: {
+        type: String,
+        default: "",
+      },
+    },
+
+    // 🔹 KYC Details (NEW)
+    aadharNumber: {
+      type: String,
+      unique: true,
+      sparse: true,
+      minlength: 12,
+      maxlength: 12,
+      select: false, // 🔒 hide
     },
 
     // 🔹 Ratings & Reviews
@@ -83,27 +125,54 @@ const sellerSchema = new mongoose.Schema(
 
     reviews: [reviewSchema],
 
-
     // 🔹 Work Status
     isVerified: {
       type: Boolean,
       default: false,
     },
 
-    // 🔹 Wallet (for future payments system)
+    otp: {
+      type: String,
+      select: false, // 🔒 hide OTP
+    },
+
+    otpExpiry: {
+      type: Date,
+      select: false,
+    },
+
+    // 🔹 Wallet
     walletBalance: {
       type: Number,
       default: 0,
     },
 
-    // 🔹 Account Status
-    status: {
+    // 🔹 NEW: Admin Approval System
+    adminApproval: {
       type: String,
-      enum: ["active", "blocked", "pending"],
+      enum: ["pending", "approved", "rejected"],
       default: "pending",
+    },
+
+    approvedAt: {
+      type: Date,
+    },
+
+    rejectionReason: {
+      type: String,
+      default: "",
     },
   },
   { timestamps: true }
 );
+
+// ✅ Clean JSON response
+sellerSchema.methods.toJSON = function () {
+  const obj = this.toObject();
+  delete obj.password;
+  delete obj.bankDetails?.accountNumber;
+  delete obj.aadharNumber;
+  return obj;
+};
 
 export default mongoose.model("Seller", sellerSchema);
