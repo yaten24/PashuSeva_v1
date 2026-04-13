@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Upload, MapPin } from "lucide-react";
 import axios from "axios";
+import {
+  FaBox,
+  FaTag,
+  FaRupeeSign,
+  FaLayerGroup,
+  FaMapMarkerAlt,
+  FaImage,
+  FaPlus,
+} from "react-icons/fa";
 
 const AddProduct = () => {
   const [formData, setFormData] = useState({
@@ -37,7 +44,6 @@ const AddProduct = () => {
       );
       setStates(res.data.data.states);
     };
-
     fetchStates();
   }, []);
 
@@ -45,22 +51,15 @@ const AddProduct = () => {
   const fetchCities = async (stateName) => {
     const res = await axios.post(
       "https://countriesnow.space/api/v0.1/countries/state/cities",
-      {
-        country: "India",
-        state: stateName,
-      }
+      { country: "India", state: stateName }
     );
     setCities(res.data.data);
   };
 
-  // Handle change
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
 
     if (name === "state") {
       fetchCities(value);
@@ -68,12 +67,10 @@ const AddProduct = () => {
     }
   };
 
-  // Images
   const handleImageChange = (e) => {
     setImages(Array.from(e.target.files));
   };
 
-  // 🔥 Submit to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -82,34 +79,22 @@ const AddProduct = () => {
 
       const data = new FormData();
 
-      // append fields
       Object.keys(formData).forEach((key) => {
         data.append(key, formData[key]);
       });
 
-      // append images
-      images.forEach((img) => {
-        data.append("images", img);
-      });
+      images.forEach((img) => data.append("images", img));
 
-      const token = localStorage.getItem("token"); // JWT
-
-      const res = await axios.post(
+      await axios.post(
         "http://localhost:5000/api/seller/product/create",
         data,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
+          withCredentials: true, // 🔥 FIX (cookie based)
         }
       );
 
-      console.log(res.data);
+      alert("✅ Product Added");
 
-      alert("✅ Product Added Successfully");
-
-      // reset form
       setFormData({
         name: "",
         description: "",
@@ -121,112 +106,120 @@ const AddProduct = () => {
       });
 
       setImages([]);
-
-    } catch (err) {
-      console.error(err);
-      alert("❌ Error adding product");
+    } catch {
+      alert("❌ Error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-screen bg-gray-950 text-white px-3 py-4 md:px-6">
 
-      <motion.h1 className="text-3xl font-bold mb-6">
-        Add New Product 🐄
-      </motion.h1>
+      {/* 🔥 HEADER */}
+      <h1 className="text-xl md:text-3xl font-bold mb-5 flex items-center gap-2">
+        Add Product
+      </h1>
 
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/10 p-6 border border-white/20"
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-white/5 p-4 md:p-6 border border-white/10"
       >
 
         {/* Name */}
         <div>
-          <label>Product Name</label>
+          <label className="text-sm flex items-center gap-2">
+            <FaBox /> Product Name
+          </label>
           <input
-            type="text"
             name="name"
-            required
             value={formData.name}
             onChange={handleChange}
-            className="w-full mt-1 p-2 bg-transparent border"
+            required
+            className="w-full mt-1 p-2 bg-gray-800 border border-gray-700 text-sm"
           />
         </div>
 
         {/* Category */}
         <div>
-          <label>Category</label>
+          <label className="text-sm flex items-center gap-2">
+            <FaTag /> Category
+          </label>
           <select
             name="category"
-            required
             value={formData.category}
             onChange={handleChange}
-            className="w-full mt-1 p-2 bg-gray-800 border"
+            required
+            className="w-full mt-1 p-2 bg-gray-800 border text-sm"
           >
-            <option value="">Select Category</option>
-            {categories.map((cat, i) => (
-              <option key={i}>{cat}</option>
+            <option value="">Select</option>
+            {categories.map((c, i) => (
+              <option key={i}>{c}</option>
             ))}
           </select>
         </div>
 
         {/* Price */}
         <div>
-          <label>Price</label>
+          <label className="text-sm flex items-center gap-2">
+            <FaRupeeSign /> Price
+          </label>
           <input
             type="number"
             name="price"
-            required
             value={formData.price}
             onChange={handleChange}
-            className="w-full mt-1 p-2 border"
+            required
+            className="w-full mt-1 p-2 bg-gray-800 border text-sm"
           />
         </div>
 
         {/* Stock */}
         <div>
-          <label>Stock</label>
+          <label className="text-sm flex items-center gap-2">
+            <FaLayerGroup /> Stock
+          </label>
           <input
             type="number"
             name="stock"
             value={formData.stock}
             onChange={handleChange}
-            className="w-full mt-1 p-2 border"
+            className="w-full mt-1 p-2 bg-gray-800 border text-sm"
           />
         </div>
 
         {/* State */}
         <div>
-          <label>State</label>
+          <label className="text-sm flex items-center gap-2">
+            <FaMapMarkerAlt /> State
+          </label>
           <select
             name="state"
-            required
             value={formData.state}
             onChange={handleChange}
-            className="w-full mt-1 p-2 bg-gray-800 border"
+            required
+            className="w-full mt-1 p-2 bg-gray-800 border text-sm"
           >
-            <option value="">Select State</option>
+            <option value="">Select</option>
             {states.map((s, i) => (
-              <option key={i} value={s.name}>
-                {s.name}
-              </option>
+              <option key={i}>{s.name}</option>
             ))}
           </select>
         </div>
 
         {/* City */}
         <div>
-          <label>City</label>
+          <label className="text-sm flex items-center gap-2">
+            <FaMapMarkerAlt /> City
+          </label>
           <select
             name="city"
-            required
             value={formData.city}
             onChange={handleChange}
-            className="w-full mt-1 p-2 bg-gray-800 border"
+            required
+            className="w-full mt-1 p-2 bg-gray-800 border text-sm"
           >
-            <option value="">Select City</option>
+            <option value="">Select</option>
             {cities.map((c, i) => (
               <option key={i}>{c}</option>
             ))}
@@ -235,38 +228,46 @@ const AddProduct = () => {
 
         {/* Description */}
         <div className="md:col-span-2">
-          <label>Description</label>
+          <label className="text-sm">Description</label>
           <textarea
             name="description"
-            rows="4"
             value={formData.description}
             onChange={handleChange}
-            className="w-full mt-1 p-2 border"
+            rows="3"
+            className="w-full mt-1 p-2 bg-gray-800 border text-sm"
           />
         </div>
 
         {/* Images */}
         <div className="md:col-span-2">
-          <label>Upload Images</label>
-          <input type="file" multiple onChange={handleImageChange} />
+          <label className="text-sm flex items-center gap-2">
+            <FaImage /> Upload Images
+          </label>
+          <input
+            type="file"
+            multiple
+            onChange={handleImageChange}
+            className="mt-1 text-sm"
+          />
 
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-2 mt-2 flex-wrap">
             {images.map((img, i) => (
               <img
                 key={i}
                 src={URL.createObjectURL(img)}
-                className="w-20 h-20 object-cover"
+                className="w-16 h-16 md:w-20 md:h-20 object-cover border"
               />
             ))}
           </div>
         </div>
 
         {/* Submit */}
-        <div className="md:col-span-2 text-center">
+        <div className="md:col-span-2">
           <button
             disabled={loading}
-            className="bg-green-500 px-8 py-2 font-semibold"
+            className="w-full bg-green-600 hover:bg-green-700 py-2 text-sm md:text-base flex justify-center items-center gap-2"
           >
+            <FaPlus />
             {loading ? "Adding..." : "Add Product"}
           </button>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaEnvelope,
@@ -9,10 +10,11 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
+import { useSeller } from "../Context/authContext";
 
 const SellerLogin = () => {
   const navigate = useNavigate();
-
+  const { loginSeller } = useSeller();
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -33,35 +35,20 @@ const SellerLogin = () => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const res = await fetch(
-        "https://api.apnapashu.com/api/seller/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+    const res = await loginSeller(formData);
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message);
-
-      localStorage.setItem("sellerToken", data.token);
-
+    if (res.success) {
       toast.success("Login Successful 🚀");
-
-      setTimeout(() => navigate("/seller/dashboard"), 1200);
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
+      navigate("/seller/dashboard");
+    } else {
+      toast.error(res.message);
     }
+
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-
       {/* 🔥 LEFT BRANDING */}
       <div
         className="hidden md:flex w-1/2 relative items-center justify-center text-white px-12"
@@ -92,7 +79,6 @@ const SellerLogin = () => {
 
       {/* 🔥 RIGHT FORM */}
       <div className="flex w-full md:w-1/2 items-center justify-center bg-gray-50 px-4 py-10">
-
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,7 +89,6 @@ const SellerLogin = () => {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-
             {/* Email */}
             <div className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600 focus-within:ring-1 focus-within:ring-green-600">
               <FaEnvelope className="mr-2 text-gray-500" />
@@ -130,7 +115,10 @@ const SellerLogin = () => {
                 onChange={handleChange}
                 required
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+              >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
@@ -148,12 +136,14 @@ const SellerLogin = () => {
           {/* Footer */}
           <p className="text-sm text-center mt-4">
             Don't have an account?{" "}
-            <Link to="/seller/register" className="text-green-600 font-semibold">
+            <Link
+              to="/seller/register"
+              className="text-green-600 font-semibold"
+            >
               Register
             </Link>
           </p>
         </motion.div>
-
       </div>
     </div>
   );

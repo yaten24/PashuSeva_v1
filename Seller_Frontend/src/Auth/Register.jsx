@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaUser,
@@ -13,14 +14,18 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 
-      {/* 🔥 LEFT BRANDING */}
-      import { FaUsers, FaTools, FaShieldAlt } from "react-icons/fa";
+{
+  /* 🔥 LEFT BRANDING */
+}
+import { FaUsers, FaTools, FaShieldAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useSeller } from "../Context/authContext";
 
 const SellerRegister = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const { registerSeller } = useSeller();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -46,7 +51,7 @@ const SellerRegister = () => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ country: "India" }),
-          }
+          },
         );
         const data = await res.json();
         setStates(data.data.states);
@@ -65,7 +70,7 @@ const SellerRegister = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ country: "India", state }),
-        }
+        },
       );
       const data = await res.json();
       setCities(data.data);
@@ -89,99 +94,83 @@ const SellerRegister = () => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const res = await fetch(
-        "http://localhost:5000/api/seller/register",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+    const res = await registerSeller(formData);
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message);
-
-      toast.success("Seller Registered Successfully 🚀");
-
-      setTimeout(() => navigate("/seller/login"), 1500);
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
+    if (res.success) {
+      toast.success("Registered Successfully 🚀");
+      navigate("/seller/dashboard"); // 🔥 better UX
+    } else {
+      toast.error(res.message);
     }
+
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
+      <div
+        className="hidden md:flex w-1/2 relative items-center justify-center text-white px-12"
+        style={{
+          backgroundImage: "url('/images/seller_home.jpg')", // ✅ FIXED PATH
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/80 to-black/80"></div>
 
+        <div className="relative z-10 max-w-md">
+          {/* Heading */}
+          <h1 className="text-4xl font-bold mb-4 leading-tight">
+            Grow with <span className="text-green-400">PashuSeva</span>
+          </h1>
 
-<div
-  className="hidden md:flex w-1/2 relative items-center justify-center text-white px-12"
-  style={{
-    backgroundImage: "url('/images/seller_home.jpg')", // ✅ FIXED PATH
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-  }}
->
-  {/* Overlay */}
-  <div className="absolute inset-0 bg-gradient-to-br from-green-900/80 to-black/80"></div>
-
-  <div className="relative z-10 max-w-md">
-
-    {/* Heading */}
-    <h1 className="text-4xl font-bold mb-4 leading-tight">
-      Grow with <span className="text-green-400">PashuSeva</span>
-    </h1>
-
-    {/* Description */}
-    <p className="text-gray-300 text-base leading-relaxed">
-      Join India’s fast-growing livestock platform designed to empower sellers,
-      veterinarians, and service providers. Expand your reach, manage your
-      services efficiently, and build a trusted digital presence.
-    </p>
-
-    {/* Features */}
-    <div className="mt-8 space-y-4">
-
-      <div className="flex items-start gap-3">
-        <FaUsers className="text-green-400 mt-1" />
-        <div>
-          <p className="font-semibold">Reach More Customers</p>
-          <p className="text-sm text-gray-400">
-            Connect with farmers across multiple cities and grow your network.
+          {/* Description */}
+          <p className="text-gray-300 text-base leading-relaxed">
+            Join India’s fast-growing livestock platform designed to empower
+            sellers, veterinarians, and service providers. Expand your reach,
+            manage your services efficiently, and build a trusted digital
+            presence.
           </p>
+
+          {/* Features */}
+          <div className="mt-8 space-y-4">
+            <div className="flex items-start gap-3">
+              <FaUsers className="text-green-400 mt-1" />
+              <div>
+                <p className="font-semibold">Reach More Customers</p>
+                <p className="text-sm text-gray-400">
+                  Connect with farmers across multiple cities and grow your
+                  network.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <FaTools className="text-green-400 mt-1" />
+              <div>
+                <p className="font-semibold">Easy Service Management</p>
+                <p className="text-sm text-gray-400">
+                  Manage bookings, services, and operations from one dashboard.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <FaShieldAlt className="text-green-400 mt-1" />
+              <div>
+                <p className="font-semibold">Secure & Trusted Platform</p>
+                <p className="text-sm text-gray-400">
+                  Verified system ensuring safety and reliability for sellers.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="flex items-start gap-3">
-        <FaTools className="text-green-400 mt-1" />
-        <div>
-          <p className="font-semibold">Easy Service Management</p>
-          <p className="text-sm text-gray-400">
-            Manage bookings, services, and operations from one dashboard.
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-start gap-3">
-        <FaShieldAlt className="text-green-400 mt-1" />
-        <div>
-          <p className="font-semibold">Secure & Trusted Platform</p>
-          <p className="text-sm text-gray-400">
-            Verified system ensuring safety and reliability for sellers.
-          </p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
 
       {/* 🔥 FORM */}
       <div className="flex w-full md:w-1/2 items-center justify-center bg-gray-50 px-4 py-10">
-
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -192,14 +181,25 @@ const SellerRegister = () => {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-
             {/* INPUTS */}
             {[
               { name: "name", icon: <FaUser />, placeholder: "Full Name" },
               { name: "email", icon: <FaEnvelope />, placeholder: "Email" },
-              { name: "mobile", icon: <FaPhone />, placeholder: "Mobile Number" },
-              { name: "businessName", icon: <FaBuilding />, placeholder: "Business Name" },
-              { name: "aadharNumber", icon: <FaIdCard />, placeholder: "Aadhar Number" },
+              {
+                name: "mobile",
+                icon: <FaPhone />,
+                placeholder: "Mobile Number",
+              },
+              {
+                name: "businessName",
+                icon: <FaBuilding />,
+                placeholder: "Business Name",
+              },
+              {
+                name: "aadharNumber",
+                icon: <FaIdCard />,
+                placeholder: "Aadhar Number",
+              },
             ].map((field, i) => (
               <div
                 key={i}
@@ -230,7 +230,9 @@ const SellerRegister = () => {
               >
                 <option value="">Select State</option>
                 {states.map((s, i) => (
-                  <option key={i} value={s.name}>{s.name}</option>
+                  <option key={i} value={s.name}>
+                    {s.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -247,7 +249,9 @@ const SellerRegister = () => {
               >
                 <option value="">Select City</option>
                 {cities.map((c, i) => (
-                  <option key={i} value={c}>{c}</option>
+                  <option key={i} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
             </div>
@@ -264,7 +268,10 @@ const SellerRegister = () => {
                 onChange={handleChange}
                 required
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+              >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
@@ -286,7 +293,6 @@ const SellerRegister = () => {
             </Link>
           </p>
         </motion.div>
-
       </div>
     </div>
   );

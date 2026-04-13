@@ -6,8 +6,8 @@ export const protectSeller = async (req, res, next) => {
     let token;
 
     // 🔥 Token from cookies
-    if (req.cookies && req.cookies.token) {
-      token = req.cookies.token;
+    if (req.cookies && req.cookies.sellerToken) {
+      token = req.cookies.sellerToken;
     }
 
     // ❌ No token

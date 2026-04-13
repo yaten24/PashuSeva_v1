@@ -1,173 +1,312 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { User, MapPin, Star, Wallet } from "lucide-react";
+import { useSeller } from "../Context/authContext";
+import axios from "axios";
+import {
+  FaUser,
+  FaMapMarkerAlt,
+  FaStar,
+  FaWallet,
+  FaEdit,
+  FaPhone,
+  FaEnvelope,
+  FaIdCard,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaCalendarAlt,
+  FaStore,
+  FaUniversity,
+} from "react-icons/fa";
 
 const SellerProfile = () => {
+  const { seller, loading, fetchSeller } = useSeller();
 
-  // 🔥 Demo Data
-  const demoSeller = {
-    name: "Ramesh Yadav",
-    email: "ramesh@gmail.com",
-    mobile: "9876543210",
-    profileImage: "",
-    location: {
-      city: "Meerut",
-      state: "Uttar Pradesh",
-    },
-    rating: 4.5,
-    totalReviews: 12,
-    walletBalance: 25000,
-    status: "active",
-    isVerified: true,
-    role: "seller",
-    reviews: [
-      {
-        rating: 5,
-        comment: "Very good quality animals 👍",
-      },
-      {
-        rating: 4,
-        comment: "Fast response seller",
-      },
-    ],
+  const [showModal, setShowModal] = useState(false);
+  const [showBankModal, setShowBankModal] = useState(false);
+
+  const [form, setForm] = useState({});
+  const [bankForm, setBankForm] = useState({});
+
+  if (loading) return <p className="text-white p-4">Loading...</p>;
+  if (!seller) return <p className="text-white p-4">No Seller Found</p>;
+
+  // 🔥 Edit Profile
+  const handleEdit = () => {
+    setForm(seller);
+    setShowModal(true);
   };
 
-  const [seller, setSeller] = useState(demoSeller);
+  // 🔥 Edit Bank
+  const handleBankEdit = () => {
+    setBankForm(seller.bankDetails || {});
+    setShowBankModal(true);
+  };
 
-  // 🔥 Fetch real data (override demo)
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:5000/api/seller/profile",
-          { withCredentials: true }
-        );
+  // 🔥 Update Profile
+  const handleUpdate = async () => {
+    try {
+      await axios.put(
+        "http://localhost:5000/api/seller/profile/update",
+        form,
+        { withCredentials: true }
+      );
+      await fetchSeller();
+      setShowModal(false);
+    } catch {
+      alert("Update failed");
+    }
+  };
 
-        if (res.data?.seller) {
-          setSeller(res.data.seller); // override demo
-        }
-
-      } catch (err) {
-        console.log("Using demo data...");
-      }
-    };
-
-    fetchProfile();
-  }, []);
+  // 🔥 Update Bank
+  const handleBankUpdate = async () => {
+    try {
+      await axios.put(
+        "http://localhost:5000/api/seller/bank/update",
+        { bankDetails: bankForm },
+        { withCredentials: true }
+      );
+      await fetchSeller();
+      setShowBankModal(false);
+    } catch {
+      alert("Bank update failed");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-screen bg-gray-900 text-white px-4 py-4 md:p-6">
 
-      <motion.h1 className="text-3xl font-bold mb-8">
-        Seller Profile 👨‍🌾
-      </motion.h1>
+      {/* 🔥 HEADER */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-xl md:text-3xl font-bold flex items-center gap-2">
+          <FaUser /> Seller Profile
+        </h1>
 
-      {/* Profile Card */}
-      <div className="bg-white/10 border border-white/20 p-6 grid md:grid-cols-3 gap-6">
+        <div className="flex gap-2">
+          <button
+            onClick={handleEdit}
+            className="flex items-center gap-2 bg-green-600 px-3 py-2 text-sm hover:bg-green-700"
+          >
+            <FaEdit /> Edit
+          </button>
 
-        {/* Left */}
-        <div className="flex flex-col items-center text-center">
+          <button
+            onClick={handleBankEdit}
+            className="flex items-center gap-2 bg-blue-600 px-3 py-2 text-sm hover:bg-blue-700"
+          >
+            <FaUniversity /> Bank
+          </button>
+        </div>
+      </div>
+
+      {/* 🔥 PROFILE CARD */}
+      <div className="bg-white/10 border border-white/20 p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        {/* LEFT */}
+        <div className="text-center">
           <img
-            src={
-              seller.profileImage ||
-              "https://via.placeholder.com/120"
-            }
-            alt="profile"
-            className="w-28 h-28 rounded-full object-cover border"
+            src={seller.profileImage || "https://via.placeholder.com/120"}
+            className="w-24 h-24 mx-auto rounded-full border"
           />
-
-          <h2 className="text-xl font-semibold mt-3">
-            {seller.name}
+          <h2 className="mt-3 text-lg font-semibold flex justify-center gap-2 items-center">
+            <FaUser /> {seller.name}
           </h2>
 
-          <p className="text-gray-400 text-sm">
-            {seller.email}
+          <p className="text-gray-400 text-sm flex justify-center gap-2 items-center">
+            <FaEnvelope /> {seller.email}
           </p>
 
-          <p className="text-gray-400 text-sm">
-            📞 {seller.mobile}
+          <p className="text-gray-400 text-sm flex justify-center gap-2 items-center">
+            <FaPhone /> {seller.mobile}
+          </p>
+
+          <p className="text-green-400 text-sm flex justify-center gap-2 items-center">
+            <FaStore /> {seller.businessName}
           </p>
         </div>
 
-        {/* Middle */}
-        <div className="space-y-4">
+        {/* MIDDLE */}
+        <div className="space-y-3 text-sm">
+          <p className="flex items-center gap-2">
+            <FaMapMarkerAlt /> {seller.location?.city}, {seller.location?.state}
+          </p>
 
-          <div className="flex items-center gap-2">
-            <MapPin size={16} />
-            <span>
-              {seller.location?.city}, {seller.location?.state}
-            </span>
-          </div>
+          <p className="flex items-center gap-2">
+            <FaStar className="text-yellow-400" />
+            {seller.rating} ({seller.totalReviews})
+          </p>
 
-          <div className="flex items-center gap-2">
-            <Star size={16} className="text-yellow-400" />
-            <span>
-              {seller.rating} ({seller.totalReviews} reviews)
-            </span>
-          </div>
+          <p className="flex items-center gap-2">
+            <FaWallet className="text-green-400" />
+            ₹{seller.walletBalance}
+          </p>
 
-          <div className="flex items-center gap-2">
-            <Wallet size={16} className="text-green-400" />
-            <span>₹{seller.walletBalance}</span>
-          </div>
-
+          <p className="flex items-center gap-2">
+            <FaIdCard /> {seller._id}
+          </p>
         </div>
 
-        {/* Right */}
-        <div className="space-y-4">
+        {/* RIGHT */}
+        <div className="space-y-3 text-sm">
 
-          <div>
-            <span className="text-gray-400 text-sm">Account Status:</span>
-            <p className="font-semibold capitalize">
-              {seller.status}
+          <p><strong>Status:</strong> {seller.adminApproval}</p>
+
+          <p className="flex items-center gap-2">
+            {seller.isVerified ? (
+              <>
+                <FaCheckCircle className="text-green-400" />
+                Verified
+              </>
+            ) : (
+              <>
+                <FaTimesCircle className="text-red-400" />
+                Not Verified
+              </>
+            )}
+          </p>
+
+          <p><strong>Role:</strong> {seller.role}</p>
+
+          {seller.rejectionReason && (
+            <p className="text-red-400">{seller.rejectionReason}</p>
+          )}
+
+          <p className="text-gray-400 text-xs flex items-center gap-2">
+            <FaCalendarAlt />
+            {new Date(seller.createdAt).toLocaleDateString()}
+          </p>
+
+          {/* 🔥 BANK DETAILS */}
+          <div className="mt-3 border-t border-white/10 pt-2">
+            <p className="text-gray-400 flex items-center gap-2">
+              <FaUniversity /> Bank Details
             </p>
-          </div>
 
-          <div>
-            <span className="text-gray-400 text-sm">Verification:</span>
-            <p
-              className={`font-semibold ${
-                seller.isVerified ? "text-green-400" : "text-yellow-400"
-              }`}
-            >
-              {seller.isVerified ? "Verified ✅" : "Pending ⏳"}
-            </p>
-          </div>
-
-          <div>
-            <span className="text-gray-400 text-sm">Role:</span>
-            <p className="font-semibold">{seller.role}</p>
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Reviews */}
-      <div className="mt-10">
-        <h2 className="text-xl font-semibold mb-4">Reviews</h2>
-
-        {seller.reviews?.length === 0 ? (
-          <p className="text-gray-400">No reviews yet</p>
-        ) : (
-          <div className="space-y-4">
-            {seller.reviews?.map((rev, i) => (
-              <div
-                key={i}
-                className="bg-white/10 p-4 border border-white/20"
-              >
-                <p className="text-yellow-400">
-                  ⭐ {rev.rating}
-                </p>
-                <p className="text-sm text-gray-300">
-                  {rev.comment}
-                </p>
+            {seller.bankDetails?.bankName ? (
+              <div className="text-xs mt-1 space-y-1">
+                <p>🏦 {seller.bankDetails.bankName}</p>
+                <p>👤 {seller.bankDetails.accountHolderName || "-"}</p>
+                <p>🔢 ****{seller.bankDetails.accountNumber?.slice(-4)}</p>
+                <p>IFSC: {seller.bankDetails.ifsc}</p>
               </div>
-            ))}
+            ) : (
+              <p className="text-red-400 text-xs mt-1">
+                Not Added
+              </p>
+            )}
           </div>
-        )}
+
+        </div>
+
       </div>
+
+      {/* 🔥 PROFILE MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 flex justify-center items-center">
+          <div className="bg-gray-800 p-6 w-full max-w-md">
+
+            <h2 className="mb-4 font-semibold flex gap-2">
+              <FaEdit /> Edit Profile
+            </h2>
+
+            <input
+              value={form.name || ""}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full mb-3 p-2 bg-gray-700"
+              placeholder="Name"
+            />
+
+            <input
+              value={form.mobile || ""}
+              onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+              className="w-full mb-3 p-2 bg-gray-700"
+              placeholder="Mobile"
+            />
+
+            <input
+              value={form.businessName || ""}
+              onChange={(e) => setForm({ ...form, businessName: e.target.value })}
+              className="w-full mb-3 p-2 bg-gray-700"
+              placeholder="Business Name"
+            />
+
+            <div className="flex justify-between mt-4">
+              <button onClick={() => setShowModal(false)} className="bg-gray-600 px-4 py-2">
+                Cancel
+              </button>
+
+              <button onClick={handleUpdate} className="bg-green-600 px-4 py-2">
+                Save
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* 🔥 BANK MODAL */}
+      {showBankModal && (
+        <div className="fixed inset-0 bg-black/70 flex justify-center items-center">
+          <div className="bg-gray-800 p-6 w-full max-w-md">
+
+            <h2 className="mb-4 font-semibold flex gap-2">
+              <FaUniversity /> Bank Details
+            </h2>
+
+            <input
+              placeholder="Account Holder Name"
+              value={bankForm.accountHolderName || ""}
+              onChange={(e) =>
+                setBankForm({ ...bankForm, accountHolderName: e.target.value })
+              }
+              className="w-full mb-3 p-2 bg-gray-700"
+            />
+
+            <input
+              placeholder="Bank Name"
+              value={bankForm.bankName || ""}
+              onChange={(e) =>
+                setBankForm({ ...bankForm, bankName: e.target.value })
+              }
+              className="w-full mb-3 p-2 bg-gray-700"
+            />
+
+            <input
+              placeholder="Account Number"
+              value={bankForm.accountNumber || ""}
+              onChange={(e) =>
+                setBankForm({ ...bankForm, accountNumber: e.target.value })
+              }
+              className="w-full mb-3 p-2 bg-gray-700"
+            />
+
+            <input
+              placeholder="IFSC Code"
+              value={bankForm.ifsc || ""}
+              onChange={(e) =>
+                setBankForm({ ...bankForm, ifsc: e.target.value })
+              }
+              className="w-full mb-3 p-2 bg-gray-700"
+            />
+
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={() => setShowBankModal(false)}
+                className="bg-gray-600 px-4 py-2"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleBankUpdate}
+                className="bg-blue-600 px-4 py-2"
+              >
+                Save
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

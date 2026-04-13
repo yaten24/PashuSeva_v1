@@ -12,22 +12,15 @@ export const registerSellerController = async (req, res) => {
       mobile,
       city,
       state,
-      businessName,     // ✅ NEW
-      aadharNumber,     // ✅ NEW
+      businessName, // ✅ NEW
+      aadharNumber, // ✅ NEW
     } = req.body;
 
     // 🔸 1. Basic Validation
-    if (
-      !name ||
-      !mobile ||
-      !password ||
-      !businessName ||
-      !aadharNumber
-    ) {
+    if (!name || !mobile || !password || !businessName || !aadharNumber) {
       return res.status(400).json({
         success: false,
-        message:
-          "Name, Mobile, Password, Business Name & Aadhar are required",
+        message: "Name, Mobile, Password, Business Name & Aadhar are required",
       });
     }
 
@@ -68,18 +61,13 @@ export const registerSellerController = async (req, res) => {
 
     // 🔸 6. Check Existing Seller
     const existingSeller = await Seller.findOne({
-      $or: [
-        { mobile },
-        ...(email ? [{ email }] : []),
-        { aadharNumber },
-      ],
+      $or: [{ mobile }, ...(email ? [{ email }] : []), { aadharNumber }],
     });
 
     if (existingSeller) {
       return res.status(400).json({
         success: false,
-        message:
-          "Seller already exists with this mobile/email/aadhar",
+        message: "Seller already exists with this mobile/email/aadhar",
       });
     }
 
@@ -100,6 +88,18 @@ export const registerSellerController = async (req, res) => {
         state: state || "",
       },
       status: "pending", // 🔥 approval system
+    });
+
+    const token = jwt.sign({ id: seller._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    // 🔥 Save in Cookies
+    res.cookie("sellerToken", token, {
+      httpOnly: true, // JS access blocked (security 🔥)
+      secure: process.env.NODE_ENV === "production", // https only in prod
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     // 🔸 9. Response
@@ -124,8 +124,7 @@ export const registerSellerController = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message:
-          "Duplicate field value (mobile/email/aadhar already exists)",
+        message: "Duplicate field value (mobile/email/aadhar already exists)",
       });
     }
 
@@ -135,6 +134,7 @@ export const registerSellerController = async (req, res) => {
     });
   }
 };
+
 export const loginSellerController = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -165,18 +165,23 @@ export const loginSellerController = async (req, res) => {
     }
 
     // 🔹 Generate Token
-    const token = jwt.sign(
-      { id: seller._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = jwt.sign({ id: seller._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     // 🔥 Save in Cookies
+    // res.cookie("sellerToken", token, {
+    //   httpOnly: true, // JS access blocked (security 🔥)
+    //   secure: process.env.NODE_ENV === "production", // https only in prod
+    //   sameSite: "strict",
+    //   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    // });
+
     res.cookie("sellerToken", token, {
-      httpOnly: true, // JS access blocked (security 🔥)
-      secure: process.env.NODE_ENV === "production", // https only in prod
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     // 🔹 Response
@@ -192,6 +197,53 @@ export const loginSellerController = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "Server Error",
+    });
+  }
+};
+
+export const getSellerProfile = async (req, res) => {
+  try {
+    const sellerId = req.user.id; // middleware se aayega
+
+    const seller = await Seller.findById(sellerId).select("-password"); // 🔥 password hide
+
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      seller,
+    });
+  } catch (error) {
+    console.error("Get Seller Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+export const logoutSeller = (req, res) => {
+  try {
+    res.clearCookie("sellerToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Seller logged out successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Logout failed",
     });
   }
 };

@@ -1,188 +1,171 @@
 import React from "react";
-import { motion } from "framer-motion";
-import {
-  User,
-  IndianRupee,
-  ClipboardList,
-  PlusCircle,
-  TrendingUp,
-  Package,
-} from "lucide-react";
+import { useSeller } from "../Context/authContext";
 import { useNavigate } from "react-router-dom";
+import {
+  FaUser,
+  FaBoxOpen,
+  FaShoppingCart,
+  FaWallet,
+  FaPlus,
+  FaEdit,
+  FaSignOutAlt, // 🔥 logout icon
+} from "react-icons/fa";
 
 const SellerDashboard = () => {
+  const { seller, loading, logoutSeller } = useSeller(); // 🔥 logout function
   const navigate = useNavigate();
+
+  // 🔥 logout handler
+  const handleLogout = async () => {
+    await logoutSeller();
+    navigate("/seller/login");
+  };
+
+  if (loading)
+    return <p className="text-white p-4">Loading...</p>;
+
+  if (!seller)
+    return <p className="text-white p-4">No Seller Found</p>;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6">
-      {/* 🔥 Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -40 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center md:justify-between mb-8"
-      >
+    <div className="min-h-screen bg-gray-950 text-white px-4 py-4 md:px-6">
+
+      {/* 🔥 HEADER + LOGOUT */}
+      <div className="mb-6 md:mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Seller Dashboard 🐄</h1>
-          <p className="text-gray-300 mt-1">
-            Manage your products, orders & earnings
+          <h1 className="text-xl md:text-3xl font-bold">
+            Welcome, {seller.name}
+          </h1>
+          <p className="text-gray-400 text-sm md:text-base">
+            {seller.businessName}
           </p>
         </div>
 
-        {/* 🔥 Buttons Group */}
-        <div className="flex gap-3 mt-4 md:mt-0">
-          {/* Profile Button */}
-          <button 
-          onClick={() => navigate("/seller/profile")}
-          className="flex items-center gap-2 bg-blue-500 px-5 py-2 font-semibold hover:scale-105 transition">
-            <User size={18} /> Profile
-          </button>
+        {/* 🔥 Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-3 py-2 text-xs md:text-sm"
+        >
+          <FaSignOutAlt />
+          Logout
+        </button>
+      </div>
 
-          {/* Add Product Button */}
+      {/* 🔥 INFO CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-8">
+
+        <div className="p-4 md:p-6 bg-white/5 border border-white/10">
+          <div className="flex items-center gap-2 mb-1">
+            <FaWallet className="text-green-400 text-sm md:text-lg" />
+            <h3 className="text-xs md:text-lg">Wallet</h3>
+          </div>
+          <p className="text-lg md:text-2xl font-bold">
+            ₹{seller.walletBalance}
+          </p>
+        </div>
+
+        <div className="p-4 md:p-6 bg-white/5 border border-white/10">
+          <div className="flex items-center gap-2 mb-1">
+            <FaShoppingCart className="text-blue-400 text-sm md:text-lg" />
+            <h3 className="text-xs md:text-lg">Orders</h3>
+          </div>
+          <p className="text-lg md:text-2xl font-bold">0</p>
+        </div>
+
+        <div className="p-4 md:p-6 bg-white/5 border border-white/10 col-span-2 md:col-span-1">
+          <div className="flex items-center gap-2 mb-1">
+            <FaUser className="text-yellow-400 text-sm md:text-lg" />
+            <h3 className="text-xs md:text-lg">Rating</h3>
+          </div>
+          <p className="text-lg md:text-2xl font-bold">
+            {seller.rating} ⭐
+          </p>
+        </div>
+      </div>
+
+      {/* 🔥 QUICK ACTIONS */}
+      <div className="mb-8">
+        <h2 className="text-base md:text-xl font-semibold mb-3">
+          Quick Actions
+        </h2>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+
           <button
             onClick={() => navigate("/seller/add-product")}
-            className="flex items-center gap-2 bg-green-500 px-5 py-2 font-semibold hover:scale-105 transition"
+            className="p-3 md:p-5 bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 text-sm md:text-base"
           >
-            <PlusCircle size={18} /> Add Product
+            <FaPlus />
+            Add
           </button>
-        </div>
-      </motion.div>
 
-      {/* 🔥 Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          className="bg-white/10 p-5 border border-white/20"
-        >
-          <Package className="text-green-400 mb-2" />
-          <h2 className="text-xl font-bold">8</h2>
-          <p className="text-gray-400 text-sm">Total Products</p>
-        </motion.div>
+          <button
+            onClick={() => navigate("/seller/products")}
+            className="p-3 md:p-5 bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2 text-sm md:text-base"
+          >
+            <FaBoxOpen />
+            Products
+          </button>
 
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          className="bg-white/10 p-5 border border-white/20"
-        >
-          <ClipboardList className="text-blue-400 mb-2" />
-          <h2 className="text-xl font-bold">23</h2>
-          <p className="text-gray-400 text-sm">Total Orders</p>
-        </motion.div>
+          <button
+            onClick={() => navigate("/seller/orders")}
+            className="p-3 md:p-5 bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-2 text-sm md:text-base"
+          >
+            <FaShoppingCart />
+            Orders
+          </button>
 
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          className="bg-white/10 p-5 border border-white/20"
-        >
-          <ClipboardList className="text-yellow-400 mb-2" />
-          <h2 className="text-xl font-bold">5</h2>
-          <p className="text-gray-400 text-sm">Pending Orders</p>
-        </motion.div>
+          <button
+            onClick={() => navigate("/seller/profile")}
+            className="p-3 md:p-5 bg-gray-700 hover:bg-gray-800 flex items-center justify-center gap-2 text-sm md:text-base"
+          >
+            <FaEdit />
+            Profile
+          </button>
 
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          className="bg-white/10 p-5 border border-white/20"
-        >
-          <IndianRupee className="text-green-300 mb-2" />
-          <h2 className="text-xl font-bold">₹52,000</h2>
-          <p className="text-gray-400 text-sm">Total Earnings</p>
-        </motion.div>
-      </div>
-
-      {/* 🔥 Products Section */}
-      <div className="mb-12">
-        <h2 className="text-xl font-semibold mb-4">Your Products</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white/10 p-4 border border-white/20">
-            <h3 className="font-semibold">Desi Cow 🐄</h3>
-            <p className="text-sm text-gray-400">₹45,000</p>
-            <p className="text-green-400 text-xs mt-1">In Stock</p>
-
-            <div className="mt-3 flex gap-2">
-              <button className="bg-blue-500 px-3 py-1 text-xs">Edit</button>
-              <button className="bg-red-500 px-3 py-1 text-xs">Delete</button>
-            </div>
-          </div>
-
-          <div className="bg-white/10 p-4 border border-white/20">
-            <h3 className="font-semibold">Goat 🐐</h3>
-            <p className="text-sm text-gray-400">₹12,000</p>
-            <p className="text-yellow-400 text-xs mt-1">Low Stock</p>
-
-            <div className="mt-3 flex gap-2">
-              <button className="bg-blue-500 px-3 py-1 text-xs">Edit</button>
-              <button className="bg-red-500 px-3 py-1 text-xs">Delete</button>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* 🔥 Orders Section */}
-      <div className="mb-12">
-        <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
+      {/* 🔥 SELLER DETAILS */}
+      <div className="bg-white/5 border border-white/10 p-4 md:p-6">
+        <h2 className="text-base md:text-xl font-semibold mb-4">
+          Seller Information
+        </h2>
 
-        <div className="bg-white/10 border border-white/20 overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-white/20">
-              <tr>
-                <th className="p-3 text-sm">Customer</th>
-                <th className="p-3 text-sm">Product</th>
-                <th className="p-3 text-sm">Price</th>
-                <th className="p-3 text-sm">Status</th>
-                <th className="p-3 text-sm">Action</th>
-              </tr>
-            </thead>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm md:text-base text-gray-300">
 
-            <tbody>
-              <tr className="border-t border-white/10">
-                <td className="p-3">Rahul Sharma</td>
-                <td className="p-3">Desi Cow</td>
-                <td className="p-3">₹45,000</td>
-                <td className="p-3 text-yellow-400">Pending</td>
-                <td className="p-3">
-                  <button className="bg-green-500 px-2 py-1 text-xs">
-                    Accept
-                  </button>
-                  <button className="bg-red-500 px-2 py-1 text-xs ml-2">
-                    Reject
-                  </button>
-                </td>
-              </tr>
+          <p><strong>Name:</strong> {seller.name}</p>
+          <p><strong>Email:</strong> {seller.email}</p>
+          <p><strong>Mobile:</strong> {seller.mobile}</p>
 
-              <tr className="border-t border-white/10">
-                <td className="p-3">Amit Verma</td>
-                <td className="p-3">Goat</td>
-                <td className="p-3">₹12,000</td>
-                <td className="p-3 text-green-400">Accepted</td>
-                <td className="p-3">—</td>
-              </tr>
+          <p>
+            <strong>Location:</strong>{" "}
+            {seller.location?.city}, {seller.location?.state}
+          </p>
 
-              <tr className="border-t border-white/10">
-                <td className="p-3">Suresh Kumar</td>
-                <td className="p-3">Buffalo</td>
-                <td className="p-3">₹60,000</td>
-                <td className="p-3 text-blue-400">Delivered</td>
-                <td className="p-3">—</td>
-              </tr>
-            </tbody>
-          </table>
+          <p>
+            <strong>Status:</strong>{" "}
+            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs">
+              {seller.adminApproval}
+            </span>
+          </p>
+
+          <p>
+            <strong>Verified:</strong>{" "}
+            <span
+              className={`px-2 py-1 text-xs ${
+                seller.isVerified
+                  ? "bg-green-500/20 text-green-400"
+                  : "bg-red-500/20 text-red-400"
+              }`}
+            >
+              {seller.isVerified ? "Verified" : "Not Verified"}
+            </span>
+          </p>
+
         </div>
       </div>
 
-      {/* 🔥 Bottom CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="mt-12 bg-gradient-to-r from-green-500 to-blue-600 p-6 text-center"
-      >
-        <h2 className="text-2xl font-semibold">Grow Your Animal Business 🚀</h2>
-
-        <p className="mt-2 text-white/90">
-          Add more animals/products & increase your sales
-        </p>
-
-        <button className="mt-4 bg-white text-black px-6 py-2 font-semibold hover:scale-105 transition">
-          Add New Product
-        </button>
-      </motion.div>
     </div>
   );
 };
