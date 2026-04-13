@@ -62,7 +62,6 @@ const doctorSchema = new mongoose.Schema(
 
      registrationNumber: {
       type: String,
-      required: true,
       unique: true,
     },
 

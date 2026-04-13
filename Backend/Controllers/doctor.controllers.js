@@ -10,18 +10,32 @@ export const registerDoctorController = async (req, res) => {
       mobile,
       password,
       specialization,
+      qualification,
       experience,
       consultationFee,
+      state,
+      city,
+      aadhaar,
     } = req.body;
 
-    // 🔹 1. Validation
-    if (!name || !mobile || !password || !specialization || !consultationFee) {
+    // 🔹 1. Required Validation
+    if (
+      !name ||
+      !mobile ||
+      !password ||
+      !specialization ||
+      !consultationFee ||
+      !state ||
+      !city ||
+      !qualification
+    ) {
       return res.status(400).json({
         success: false,
         message: "Please fill all required fields",
       });
     }
 
+    // 🔹 Password validation
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
@@ -29,7 +43,7 @@ export const registerDoctorController = async (req, res) => {
       });
     }
 
-    // 🔹 Email format check (optional but recommended)
+    // 🔹 Email validation
     if (email && !/^\S+@\S+\.\S+$/.test(email)) {
       return res.status(400).json({
         success: false,
@@ -45,9 +59,35 @@ export const registerDoctorController = async (req, res) => {
       });
     }
 
+    // 🔹 Aadhaar validation (optional but recommended)
+    if (aadhaar && !/^\d{12}$/.test(aadhaar)) {
+      return res.status(400).json({
+        success: false,
+        message: "Aadhaar must be 12 digits",
+      });
+    }
+
+    // 🔹 Numeric validation
+    if (isNaN(consultationFee) || consultationFee < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid consultation fee",
+      });
+    }
+
+    if (experience && isNaN(experience)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid experience value",
+      });
+    }
+
     // 🔹 2. Check Existing Doctor
     const existingDoctor = await Doctor.findOne({
-      $or: [{ mobile }, { email }],
+      $or: [
+        { mobile: mobile.trim() },
+        ...(email ? [{ email: email.trim().toLowerCase() }] : []),
+      ],
     });
 
     if (existingDoctor) {
@@ -64,29 +104,46 @@ export const registerDoctorController = async (req, res) => {
     // 🔹 4. Create Doctor
     const doctor = await Doctor.create({
       name: name.trim(),
-      email: email?.trim().toLowerCase(),
+      email: email ? email.trim().toLowerCase() : undefined,
       mobile: mobile.trim(),
       password: hashedPassword,
       specialization,
+      qualification,
       experience: experience || 0,
-      consultationFee,
-      status: "pending", // admin approval required
+      consultationFee: Number(consultationFee),
+      state,
+      city,
+      aadhaar,
+      status: "pending", // 🔥 admin approval required
     });
 
-    // 🔹 5. Token
-    // const token = generateToken(doctor._id);
+    const token = jwt.sign(
+      { id: doctor._id, role: "doctor" },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-    // 🔹 6. Response
+    // 🔥 5. Save Token in Cookie
+    res.cookie("doctorToken", token, {
+      httpOnly: true, // JS se access nahi hoga (secure 🔥)
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // 🔹 5. Response
     res.status(201).json({
       success: true,
       message: "Doctor registered successfully. Waiting for approval.",
-      // token,
       doctor: {
         _id: doctor._id,
         name: doctor.name,
         mobile: doctor.mobile,
         specialization: doctor.specialization,
+        qualification: doctor.qualification,
         consultationFee: doctor.consultationFee,
+        state: doctor.state,
+        city: doctor.city,
         status: doctor.status,
       },
     });
@@ -97,7 +154,7 @@ export const registerDoctorController = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: "Mobile or Email already exists",
+        message: "Mobile, Email or Aadhaar already exists",
       });
     }
 
@@ -107,6 +164,7 @@ export const registerDoctorController = async (req, res) => {
     });
   }
 };
+
 import jwt from "jsonwebtoken";
 
 

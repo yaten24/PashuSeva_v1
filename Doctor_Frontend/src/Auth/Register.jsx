@@ -1,5 +1,8 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useDoctorAuth } from "../Context/DoctorAuthContext";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { FaUserMd, FaCalendarCheck, FaRupeeSign } from "react-icons/fa";
 import {
   Eye,
   EyeOff,
@@ -9,14 +12,18 @@ import {
   Phone,
   Briefcase,
   DollarSign,
+  MapPin,
 } from "lucide-react";
-import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 
 const DoctorRegister = () => {
+  const { registerDoctor } = useDoctorAuth();
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -24,150 +31,260 @@ const DoctorRegister = () => {
     mobile: "",
     password: "",
     specialization: "",
+    qualification: "",
     experience: "",
     consultationFee: "",
+    state: "",
+    city: "",
+    aadhaar: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  // 🔥 FETCH STATES
+  useEffect(() => {
+    fetch("https://countriesnow.space/api/v0.1/countries/states", {
+      method: "POST",
+      body: JSON.stringify({ country: "India" }),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => res.json())
+      .then((data) => setStates(data.data.states));
+  }, []);
 
-  // 🔹 Input Change
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  // 🔥 FETCH CITIES
+  const handleStateChange = async (e) => {
+    const selectedState = e.target.value;
+
+    setFormData({ ...formData, state: selectedState, city: "" });
+
+    const res = await fetch(
+      "https://countriesnow.space/api/v0.1/countries/state/cities",
+      {
+        method: "POST",
+        body: JSON.stringify({ country: "India", state: selectedState }),
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    const data = await res.json();
+    setCities(data.data);
   };
 
-  // 🔹 Submit
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // 🔥 SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setLoading(true);
 
-    try {
-      const res = await fetch(
-        "http://localhost:5000/api/doctor/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...formData,
-            experience: Number(formData.experience),
-            consultationFee: Number(formData.consultationFee),
-          }),
-        }
-      );
+    const res = await registerDoctor(formData);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
-
-      toast.success("Doctor Registered Successfully 🚀");
-
-      setTimeout(() => {
-        navigate("/seller/login");
-      }, 1500);
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
+    if (res.success) {
+      toast.success(res.message || "Registered Successfully");
+      navigate("/doctor/dashboard");
+    } else {
+      toast.error(res.message);
     }
+
+    setLoading(false);
+  };
+
+  // 🔥 ANIMATION
+  const container = {
+    hidden: {},
+    show: {
+      transition: {
+        staggerChildren: 0.08,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0 },
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center relative"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1588776814546-1ffcf47267a5')",
-      }}
-    >
-      {/* 🔹 Dark Overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div className="h-screen flex bg-gray-100">
 
-      {/* 🔥 Animated Card */}
+      {/* 🔥 LEFT SIDE */}
       <motion.div
-        initial={{ opacity: 0, y: 60, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative w-full max-w-lg bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl p-8 text-white"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="hidden md:flex w-1/2 relative text-white items-center justify-center px-10"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1588776814546-1ffcf47267a5')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
       >
-        {/* Heading */}
-        <h2 className="text-3xl font-bold text-center mb-6">
-          Doctor Register
-        </h2>
+        <div className="absolute inset-0 bg-black/70"></div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <motion.div
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="relative z-10 max-w-md text-center"
+        >
+          <h1 className="text-3xl font-bold">
+            Join <span className="text-green-400">PashuSeva</span>
+          </h1>
 
-          {/* Input Style */}
-          {[
-            { name: "name", icon: <User size={18} />, placeholder: "Full Name", type: "text" },
-            { name: "email", icon: <Mail size={18} />, placeholder: "Email", type: "email" },
-            { name: "mobile", icon: <Phone size={18} />, placeholder: "Mobile Number", type: "text" },
-            { name: "specialization", icon: <Briefcase size={18} />, placeholder: "Specialization", type: "text" },
-            { name: "experience", icon: <Briefcase size={18} />, placeholder: "Experience (years)", type: "number" },
-            { name: "consultationFee", icon: <DollarSign size={18} />, placeholder: "Consultation Fee (₹)", type: "number" },
-          ].map((field, i) => (
-            <motion.div
-              key={i}
-              whileFocus={{ scale: 1.02 }}
-              className="flex items-center border border-white/30 px-3 py-2 bg-white/10 backdrop-blur-md"
-            >
-              <span className="mr-2 text-white/80">{field.icon}</span>
-              <input
-                type={field.type}
-                name={field.name}
-                placeholder={field.placeholder}
-                className="w-full outline-none bg-transparent text-white placeholder-white/70"
-                value={formData[field.name]}
-                onChange={handleChange}
-                required
-              />
-            </motion.div>
-          ))}
+          <p className="mt-4 text-gray-200 text-sm">
+            Build your digital veterinary practice and connect with farmers.
+          </p>
 
-          {/* Password */}
-          <div className="flex items-center border border-white/30 px-3 py-2 bg-white/10">
-            <Lock size={18} className="mr-2 text-white/80" />
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Password"
-              className="w-full outline-none bg-transparent text-white placeholder-white/70"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-            <button type="button" onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+          <div className="mt-6 space-y-3 text-left">
+            <div className="flex items-center gap-3 bg-white/10 px-3 py-2 border border-white/20">
+              <FaUserMd className="text-green-400" />
+              <span>Verified Doctor Profile</span>
+            </div>
+            <div className="flex items-center gap-3 bg-white/10 px-3 py-2 border border-white/20">
+              <FaCalendarCheck className="text-green-400" />
+              <span>Easy Appointment Management</span>
+            </div>
+            <div className="flex items-center gap-3 bg-white/10 px-3 py-2 border border-white/20">
+              <FaRupeeSign className="text-green-400" />
+              <span>Increase Your Earnings</span>
+            </div>
           </div>
-
-          {/* Submit */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 py-2 font-semibold shadow-lg"
-          >
-            {loading ? "Registering..." : "Register"}
-          </motion.button>
-        </form>
-
-        {/* Footer */}
-        <p className="text-sm text-center mt-4 text-white/80">
-          Already have an account?{" "}
-          <Link to="/doctor/login" className="text-blue-300 font-semibold">
-            Login
-          </Link>
-        </p>
+        </motion.div>
       </motion.div>
+
+      {/* 🔥 RIGHT FORM */}
+      <div className="w-full md:w-1/2 flex items-center justify-center px-3">
+
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="w-full max-w-md bg-white p-3 shadow-md border border-gray-300 rounded-lg"
+        >
+          <motion.h2
+            variants={item}
+            className="text-lg font-semibold mb-3 text-center"
+          >
+            Doctor Register
+          </motion.h2>
+
+          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-1.5">
+
+            <Field item={item}>
+              <Input icon={<User size={14} />} name="name" placeholder="Name" onChange={handleChange} />
+            </Field>
+
+            <Field item={item}>
+              <Input icon={<Phone size={14} />} name="mobile" placeholder="Mobile" onChange={handleChange} />
+            </Field>
+
+            <Field item={item}>
+              <Input icon={<Mail size={14} />} name="email" placeholder="Email" onChange={handleChange} />
+            </Field>
+
+            <Field item={item}>
+              <Input icon={<User size={14} />} name="aadhaar" placeholder="Aadhaar" onChange={handleChange} />
+            </Field>
+
+            <Field item={item}>
+              <Select icon={<Briefcase size={14} />} name="qualification"
+                options={["B.V.Sc", "M.V.Sc", "PhD"]}
+                onChange={handleChange} placeholder="Qualification"
+              />
+            </Field>
+
+            <Field item={item}>
+              <Select icon={<Briefcase size={14} />} name="specialization"
+                options={["General", "Surgery", "Dairy"]}
+                onChange={handleChange} placeholder="Specialization"
+              />
+            </Field>
+
+            <Field item={item}>
+              <Select icon={<MapPin size={14} />} name="state"
+                options={states.map((s) => s.name)}
+                onChange={handleStateChange} placeholder="State"
+              />
+            </Field>
+
+            <Field item={item}>
+              <Select icon={<MapPin size={14} />} name="city"
+                options={cities}
+                onChange={handleChange} placeholder="City"
+              />
+            </Field>
+
+            <Field item={item}>
+              <Input icon={<Briefcase size={14} />} name="experience" placeholder="Exp" onChange={handleChange} />
+            </Field>
+
+            <Field item={item}>
+              <Input icon={<DollarSign size={14} />} name="consultationFee" placeholder="Fee" onChange={handleChange} />
+            </Field>
+
+            {/* PASSWORD */}
+            <motion.div
+              variants={item}
+              className="col-span-2 flex items-center border border-gray-300 px-2 py-1.5 rounded-md focus-within:border-green-600"
+            >
+              <Lock size={14} className="mr-2 text-gray-500" />
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                className="w-full outline-none text-xs"
+                onChange={handleChange}
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </motion.div>
+
+            {/* BUTTON */}
+            <motion.button
+              variants={item}
+              type="submit"
+              disabled={loading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
+              className="col-span-2 bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-md text-xs font-semibold disabled:opacity-50"
+            >
+              {loading ? "Registering..." : "Register"}
+            </motion.button>
+
+          </form>
+        </motion.div>
+      </div>
     </div>
   );
 };
+
+// 🔥 WRAPPER FOR ANIMATION
+const Field = ({ children, item }) => (
+  <motion.div variants={item}>{children}</motion.div>
+);
+
+// 🔥 INPUT
+const Input = ({ icon, ...props }) => (
+  <div className="flex items-center border border-gray-300 px-2 py-1.5 rounded-md focus-within:border-green-600">
+    <span className="mr-2 text-gray-500">{icon}</span>
+    <input className="w-full outline-none text-xs" {...props} />
+  </div>
+);
+
+// 🔥 SELECT
+const Select = ({ icon, options, placeholder, ...props }) => (
+  <div className="flex items-center border border-gray-300 px-2 py-1.5 rounded-md focus-within:border-green-600">
+    <span className="mr-2 text-gray-500">{icon}</span>
+    <select className="w-full outline-none text-xs bg-transparent" {...props}>
+      <option value="">{placeholder}</option>
+      {options.map((opt, i) => (
+        <option key={i}>{opt}</option>
+      ))}
+    </select>
+  </div>
+);
 
 export default DoctorRegister;

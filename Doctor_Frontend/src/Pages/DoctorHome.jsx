@@ -1,176 +1,212 @@
 import React from "react";
+ import { FaUserMd, FaCalendarCheck, FaRupeeSign } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Stethoscope, Users, Shield, IndianRupee } from "lucide-react";
+import {
+  Stethoscope,
+  Users,
+  Shield,
+  IndianRupee,
+} from "lucide-react";
 
 const DoctorHome = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full bg-gray-50 overflow-x-hidden">
 
-      {/* 🔥 HERO SECTION */}
-      <div
-        className="relative min-h-screen flex items-center justify-center text-center text-white"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1588776814546-1ffcf47267a5')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+      {/* 🔥 HERO */}
+     
+
+<section
+  className="relative min-h-screen flex items-center justify-center px-6 md:px-16 text-white"
+  style={{
+    backgroundImage: "url('/images/doctor.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+>
+  {/* Overlay */}
+  <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-green-900/70 to-black/80"></div>
+
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="relative z-10 text-center max-w-4xl"
+  >
+    {/* 🔥 HEADING */}
+    <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+      Grow Your{" "}
+      <span className="text-green-400">
+        Veterinary Practice
+      </span>
+    </h1>
+
+    {/* 🔥 SUBTEXT */}
+    <p className="mt-6 text-gray-200 text-lg md:text-xl">
+      Join India’s fast-growing livestock healthcare platform and
+      connect with thousands of farmers in need of expert care.
+    </p>
+
+    {/* 🔥 EXTRA DESCRIPTION */}
+    <p className="mt-3 text-gray-300 text-sm md:text-base max-w-2xl mx-auto">
+      Manage appointments, track patient history, and increase your
+      earnings with a smart digital system designed for modern
+      veterinary professionals.
+    </p>
+
+    {/* 🔥 ICON FEATURES */}
+    <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+
+      <div className="flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 border border-white/20">
+        <FaUserMd className="text-green-400" />
+        <span>Verified Doctor Profile</span>
+      </div>
+
+      <div className="flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 border border-white/20">
+        <FaCalendarCheck className="text-green-400" />
+        <span>Easy Appointment Management</span>
+      </div>
+
+      <div className="flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 border border-white/20">
+        <FaRupeeSign className="text-green-400" />
+        <span>Increase Your Earnings</span>
+      </div>
+
+    </div>
+
+    {/* 🔥 CTA */}
+    <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+      <Link
+        to="/doctor/register"
+        className="px-8 py-3 bg-green-600 hover:bg-green-700 font-semibold shadow-lg transition"
       >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-blue-900/60"></div>
+        Get Started
+      </Link>
 
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 max-w-3xl px-6"
-        >
-          <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-            Join PashuSeva as a{" "}
-            <span className="text-blue-400">Veterinary Doctor</span> 🩺
-          </h1>
+      <Link
+        to="/doctor/login"
+        className="px-8 py-3 border border-white/40 hover:bg-white/10 transition"
+      >
+        Doctor Login
+      </Link>
+    </div>
+  </motion.div>
+</section>
 
-          <p className="mt-5 text-lg md:text-xl text-gray-200">
-            Provide expert animal care, connect with farmers, and grow your
-            medical practice across India.
-          </p>
-
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-            <Link
-              to="/doctor/login"
-              className="px-8 py-3 bg-white text-black font-semibold hover:scale-105 transition"
-            >
-              Doctor Login
-            </Link>
-
-            <Link
-              to="/doctor/register"
-              className="px-8 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold hover:scale-105 transition"
-            >
-              Register as Doctor
-            </Link>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* 🔥 ABOUT SECTION */}
-      <div className="py-16 px-6 max-w-6xl mx-auto text-center">
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold mb-6"
-        >
-          What is PashuSeva for Doctors?
-        </motion.h2>
-
-        <p className="text-gray-600 max-w-3xl mx-auto">
-          PashuSeva is a digital healthcare platform for livestock, helping
-          veterinary doctors connect with farmers, provide consultations, and
-          manage their practice digitally. It simplifies patient handling,
-          booking management, and income tracking.
+      {/* 🔥 TRUST STRIP */}
+      <section className="px-6 md:px-16 py-5 bg-white text-center">
+        <p className="text-gray-600">
+          Trusted by veterinary doctors across India • Secure • Fast • Reliable
         </p>
-      </div>
+      </section>
 
-      {/* 🔥 WHY JOIN */}
-      <div className="bg-white py-16 px-6">
-        <h2 className="text-3xl font-bold text-center mb-10">
-          Why Join as a Doctor?
+      {/* 🔥 FEATURES */}
+      <section className="px-6 md:px-16 py-10">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-14">
+          Why Join PashuSeva
         </h2>
 
-        <div className="grid md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {[
             {
               icon: <Users />,
               title: "More Patients",
-              desc: "Connect with farmers and livestock owners across cities",
+              desc: "Reach farmers across multiple regions",
             },
             {
               icon: <IndianRupee />,
-              title: "Increase Earnings",
-              desc: "Earn more with online and offline consultations",
+              title: "Higher Earnings",
+              desc: "Maximize income from consultations",
             },
             {
               icon: <Stethoscope />,
-              title: "Digital Practice",
-              desc: "Manage appointments and patient records easily",
+              title: "Smart Practice",
+              desc: "Manage bookings & records easily",
             },
             {
               icon: <Shield />,
-              title: "Trusted Platform",
-              desc: "Secure and reliable healthcare ecosystem",
+              title: "Secure System",
+              desc: "Safe & reliable platform",
             },
           ].map((item, i) => (
             <motion.div
               key={i}
-              whileHover={{ scale: 1.05 }}
-              className="p-6 border bg-gray-50 shadow-sm text-center"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.15 }}
+              whileHover={{ y: -6 }}
+              className="bg-white p-6 border border-green-100 hover:border-green-500 shadow-sm hover:shadow-xl transition rounded-lg text-center"
             >
-              <div className="text-blue-500 mb-3">{item.icon}</div>
-              <h3 className="font-semibold text-lg">{item.title}</h3>
+              <div className="w-12 h-12 mx-auto flex items-center justify-center bg-green-600 text-white rounded-md mb-4">
+                {item.icon}
+              </div>
+
+              <h3 className="font-semibold">{item.title}</h3>
               <p className="text-gray-500 text-sm mt-2">{item.desc}</p>
             </motion.div>
           ))}
-
         </div>
-      </div>
+      </section>
 
       {/* 🔥 HOW IT WORKS */}
-      <div className="py-16 px-6 bg-gray-100 text-center">
-        <h2 className="text-3xl font-bold mb-10">
+      <section className="px-4 md:px-16 py-16 md:py-20 bg-gray-100 text-center">
+        <h2 className="text-3xl md:text-4xl font-bold mb-12">
           How It Works
         </h2>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {[
-            "Register as a Doctor",
-            "Set Your Availability & Fees",
-            "Start Getting Bookings",
+            {
+              title: "Register",
+              desc: "Create your doctor account",
+            },
+            {
+              title: "Set Availability",
+              desc: "Add timing & consultation fees",
+            },
+            {
+              title: "Start Earning",
+              desc: "Receive bookings instantly",
+            },
           ].map((step, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="p-6 bg-white shadow"
+              transition={{ delay: i * 0.2 }}
+              whileHover={{ scale: 1.03 }}
+              className="bg-white p-5 md:p-8 border border-green-100 hover:border-green-500 rounded-lg shadow-sm hover:shadow-xl transition"
             >
-              <h3 className="text-xl font-semibold mb-2">
-                Step {i + 1}
-              </h3>
-              <p className="text-gray-600">{step}</p>
+              <div className="w-12 h-12 mx-auto flex items-center justify-center bg-green-600 text-white rounded-full font-bold mb-3">
+                {i + 1}
+              </div>
+
+              <h3 className="font-semibold">{step.title}</h3>
+              <p className="text-gray-500 text-sm mt-2">{step.desc}</p>
             </motion.div>
           ))}
-
         </div>
-      </div>
+      </section>
 
-      {/* 🔥 CTA */}
-      <div className="py-16 text-center bg-gradient-to-r from-blue-500 to-green-500 text-white">
-        <h2 className="text-3xl font-bold">
-          Start Your Medical Journey with PashuSeva 🩺
+      {/* 🔥 FINAL CTA */}
+      <section className="px-6 md:px-16 py-20 text-center bg-gradient-to-r from-green-600 to-blue-600 text-white">
+        <h2 className="text-3xl md:text-4xl font-bold">
+          Start Your Journey Today 🚀
         </h2>
 
-        <p className="mt-3">
-          Join today and provide better care to livestock across India.
+        <p className="mt-4">
+          Join PashuSeva and grow your veterinary career faster.
         </p>
 
-        <div className="mt-6 flex justify-center gap-4">
-          <Link
-            to="/doctor/register"
-            className="px-6 py-3 bg-white text-black font-semibold hover:scale-105 transition"
-          >
-            Get Started
+        <div className="mt-8 flex justify-center gap-4 flex-wrap">
+          <Link className="px-8 py-3 bg-white text-black font-semibold shadow hover:scale-105 transition">
+            Register Now
           </Link>
 
-          <Link
-            to="/doctor/login"
-            className="px-6 py-3 border border-white hover:scale-105 transition"
-          >
+          <Link className="px-8 py-3 border border-white hover:bg-white/10 transition">
             Login
           </Link>
         </div>
-      </div>
-
+      </section>
     </div>
   );
 };
