@@ -22,7 +22,7 @@ export default function Marketplace() {
   const fetchProducts = async () => {
     try {
       const { data } = await axios.get(
-        "http://localhost:5000/api/product/get-products",
+        "https://api.apnapashu.com/api/product/get-products",
       );
 
       if (data.success) {
@@ -64,7 +64,7 @@ export default function Marketplace() {
       imagePath = `uploads/${imagePath}`;
     }
 
-    const finalUrl = `http://localhost:5000/${imagePath}`;
+    const finalUrl = `https://api.apnapashu.com/${imagePath}`;
 
     console.log("IMAGE URL:", finalUrl); // check browser console
 
