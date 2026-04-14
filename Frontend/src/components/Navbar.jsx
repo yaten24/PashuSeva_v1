@@ -42,52 +42,49 @@ export default function Navbar() {
     <header className="sticky top-0 z-50">
       {/* TOP BAR */}
       <div className="hidden md:flex justify-between items-center bg-gray-900 text-white text-[11px] px-6 lg:px-12 py-1 border-b border-gray-800 overflow-hidden">
-  {/* LEFT SIDE */}
-  <div className="flex items-center gap-5">
-    {/* TAGLINE */}
-    <span className="text-gray-300 font-medium tracking-wide">
-      India’s Trusted Platform for Animal Care & Services
-    </span>
+        {/* LEFT SIDE */}
+        <div className="flex items-center gap-5">
+          {/* TAGLINE */}
+          <span className="text-gray-300 font-medium tracking-wide">
+            India’s Trusted Platform for Animal Care & Services
+          </span>
 
-    {/* CALL */}
-    <a
-      href="tel:+919876543210"
-      className="flex items-center gap-1.5 font-semibold hover:text-yellow-400 transition"
-    >
-      <span className="relative flex h-2.5 w-2.5">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
-      </span>
+          {/* CALL */}
+          <a
+            href="tel:+919876543210"
+            className="flex items-center gap-1.5 font-semibold hover:text-yellow-400 transition"
+          >
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
+            </span>
+            <Phone size={13} />
+            +91 9876543210
+          </a>
 
-      <Phone size={13} />
-      +91 9876543210
-    </a>
+          {/* EMAIL */}
+          <a
+            href="mailto:support@apnapashu.com"
+            className="flex items-center gap-1 hover:text-yellow-400 transition"
+          >
+            <Mail size={13} />
+            support@apnapashu.com
+          </a>
+        </div>
 
-    {/* EMAIL */}
-    <a
-      href="mailto:support@apnapashu.com"
-      className="flex items-center gap-1 hover:text-yellow-400 transition"
-    >
-      <Mail size={13} />
-      support@apnapashu.com
-    </a>
-  </div>
-
-  {/* RIGHT SIDE */}
-  <a
-    href="/partner-register"
-    className="group relative px-4 py-1.5 bg-yellow-500 text-black font-bold text-[11px] flex items-center gap-2 hover:bg-yellow-400 transition-all duration-300 shadow-md"
-  >
-    <Handshake
-      size={14}
-      className="group-hover:rotate-12 transition-transform duration-300"
-    />
-
-    Become Partner
-
-    <span className="absolute inset-0 bg-white/20 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></span>
-  </a>
-</div>
+        {/* RIGHT SIDE */}
+        <a
+          href="/partner-register"
+          className="group relative px-4 py-1.5 bg-yellow-500 text-black font-bold text-[11px] flex items-center gap-2 hover:bg-yellow-400 transition-all duration-300 shadow-md"
+        >
+          <Handshake
+            size={14}
+            className="group-hover:rotate-12 transition-transform duration-300"
+          />
+          Become Partner
+          <span className="absolute inset-0 bg-white/20 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></span>
+        </a>
+      </div>
 
       {/* MAIN NAVBAR */}
       <div
@@ -268,7 +265,10 @@ export default function Navbar() {
               })}
 
               {/* PARTNER BUTTON */}
-              <button className="w-full mt-3 py-4 bg-yellow-500 text-white font-bold flex items-center justify-center gap-2 shadow-sm hover:bg-yellow-600 transition">
+              <button
+                onClick={() => navigate("/partner-register")}
+                className="w-full mt-3 py-4 bg-yellow-500 text-white font-bold flex items-center justify-center gap-2 shadow-sm hover:bg-yellow-600 transition"
+              >
                 <Handshake size={18} />
                 Become Partner
               </button>
