@@ -42,6 +42,8 @@ import AdminRoute from "./routes/AdminRoute";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import SearchPage from "./pages/SearchPage";
+import LoginHomePage from "./pages/LoginHomePage";
+import BecomePartnerPage from "./pages/BecomePartnerPage";
 
 export default function App() {
   return (
@@ -55,18 +57,21 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        
+          <Route path="partner-register" element={<BecomePartnerPage />} />
+          
+          <Route path="product/:id" element={<ProductDetails />} />
 
         {/* 🔥 MAIN APP (WITH LAYOUT) */}
         <Route path="/" element={<Layout />}>
 
-          <Route index element={<Home />} />
+          <Route index element={<LoginHomePage />} />
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="search" element={<SearchPage />} />
 
           {/* Marketplace */}
           <Route path="marketplace" element={<Marketplace />} />
-          <Route path="product/:id" element={<ProductDetails />} />
 
           {/* Doctors */}
           <Route path="doctors" element={<Doctors />} />

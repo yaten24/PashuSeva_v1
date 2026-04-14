@@ -1,163 +1,223 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-
-/* 🔥 DEMO DATA */
-const demoProducts = [
-  {
-    id: "1",
-    name: "Premium Bhusa",
-    category: "bhusa",
-    price: 450,
-    location: "Bulandshahr",
-    description: "High quality bhusa",
-    isActive: true,
-  },
-  {
-    id: "2",
-    name: "Green Chara",
-    category: "chara",
-    price: 300,
-    location: "Aligarh",
-    description: "Fresh chara",
-    isActive: true,
-  },
-  {
-    id: "3",
-    name: "Cattle Feed",
-    category: "feed",
-    price: 1200,
-    location: "Delhi",
-    description: "Protein feed",
-    isActive: true,
-  },
-];
-
-const cats = [
-  { key: "all", label: "All" },
-  { key: "bhusa", label: "Bhusa" },
-  { key: "chara", label: "Chara" },
-  { key: "feed", label: "Feed" },
-];
+import axios from "axios";
+import {
+  FaSearch,
+  FaStore,
+  FaArrowRight,
+  FaShoppingCart,
+} from "react-icons/fa";
+import { motion } from "framer-motion";
 
 export default function Marketplace() {
   const [q, setQ] = useState("");
-  const [cat, setCat] = useState("all");
-  const [loc, setLoc] = useState("");
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // 🔥 FETCH REAL API
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:5000/api/product/get-products",
+      );
+
+      if (data.success) {
+        setProducts(data.products);
+      }
+    } catch (error) {
+      console.log("Products Fetch Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔥 SEARCH FILTER
   const filtered = useMemo(() => {
-    let data = demoProducts;
+    return products.filter((p) =>
+      p.name.toLowerCase().includes(q.toLowerCase()),
+    );
+  }, [q, products]);
 
-    if (cat !== "all") data = data.filter((p) => p.category === cat);
+  // 🔥 IMAGE URL FIX
+  const getImage = (item) => {
+    let imagePath = "";
 
-    if (loc)
-      data = data.filter((p) =>
-        p.location.toLowerCase().includes(loc.toLowerCase())
-      );
+    if (item?.images?.length > 0) {
+      imagePath = item.images[0];
+    } else if (item?.image) {
+      imagePath = item.image;
+    }
 
-    if (q)
-      data = data.filter((p) =>
-        p.name.toLowerCase().includes(q.toLowerCase())
-      );
+    if (!imagePath) {
+      return "https://via.placeholder.com/400x300?text=No+Image";
+    }
 
-    return data;
-  }, [q, cat, loc]);
+    // windows path fix
+    imagePath = imagePath.replaceAll("\\", "/").trim();
+
+    // if uploads missing
+    if (!imagePath.startsWith("uploads")) {
+      imagePath = `uploads/${imagePath}`;
+    }
+
+    const finalUrl = `http://localhost:5000/${imagePath}`;
+
+    console.log("IMAGE URL:", finalUrl); // check browser console
+
+    return finalUrl;
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-yellow-50 px-4 md:px-8 py-5">
+      {/* HERO */}
+      <motion.div
+        initial={{ opacity: 0, y: 35 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white border border-yellow-200 shadow-sm p-4 md:p-6 mb-5"
+      >
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-xl md:text-3xl font-black text-gray-900">
+              Pashu<span className="text-yellow-500">Seva</span> Marketplace
+            </h1>
 
-      {/* 🔥 TOP BAR */}
-      <div className="flex flex-wrap gap-2 items-center justify-between mb-4 pb-2">
-        <h1 className="text-lg font-semibold text-gray-800">
-          PashuSeva Marketplace
-        </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Buy feed, bhusa, chara & more from trusted sellers.
+            </p>
+          </div>
 
-        <div className="flex gap-2 w-full md:w-auto">
+          <a
+            href="https://seller.apnapashu.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-5 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm"
+          >
+            <FaStore />
+            Become Seller
+          </a>
+        </div>
+      </motion.div>
+
+      {/* SEARCH */}
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="bg-white border border-gray-200 shadow-sm p-3 md:p-4 mb-5"
+      >
+        <div className="flex items-center border border-yellow-300 bg-yellow-50 px-3">
+          <FaSearch className="text-yellow-500 text-sm" />
+
           <input
-            placeholder="Search"
+            placeholder="Search products..."
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="border border-gray-300 px-3 py-1.5 text-sm w-full md:w-44 focus:border-green-600 outline-none"
-          />
-          <input
-            placeholder="Location"
-            value={loc}
-            onChange={(e) => setLoc(e.target.value)}
-            className="border border-gray-300 px-3 py-1.5 text-sm w-full md:w-36 focus:border-green-600 outline-none"
+            className="w-full px-3 py-3 text-sm outline-none bg-transparent"
           />
         </div>
-      </div>
+      </motion.div>
 
-      {/* 🔥 CATEGORY */}
-      <div className="flex gap-2 mb-4 flex-wrap">
-        {cats.map((c) => (
-          <button
-            key={c.key}
-            onClick={() => setCat(c.key)}
-            className={`px-3 py-1 text-xs border border-gray-300 transition
-            ${
-              cat === c.key
-                ? "bg-green-600 text-white border-green-600"
-                : "bg-white text-gray-700 hover:border-green-500"
-            }`}
-          >
-            {c.label}
-          </button>
-        ))}
-      </div>
-
-      {/* 🔥 PRODUCTS GRID (4 per row) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {filtered.map((p) => (
-          <div
-            key={p.id}
-            className="bg-white border border-gray-200 p-3 flex flex-col hover:border-green-500 transition"
-          >
-            {/* IMAGE */}
-            <div className="h-24 bg-gray-100 flex items-center justify-center text-xs text-gray-400 border">
-              Image
-            </div>
-
-            {/* CONTENT */}
-            <div className="mt-2 flex-1">
-              <div className="text-sm font-semibold text-gray-800 truncate">
-                {p.name}
-              </div>
-
-              <div className="text-xs text-gray-500">
-                {p.location}
-              </div>
-
-              <div className="text-green-600 text-sm font-bold mt-1">
-                ₹{p.price}
-              </div>
-            </div>
-
-            {/* BUTTONS */}
-            <div className="flex gap-2 mt-2">
-              <Link
-                to={`/product/${p.id}`}
-                className="flex-1 text-center text-xs bg-gray-800 text-white py-1.5 hover:bg-black transition"
-              >
-                View
-              </Link>
-
-              <button
-                className="flex-1 text-xs bg-green-600 text-white py-1.5 hover:bg-green-700 transition"
-                onClick={() => alert(`Buy ${p.name}`)}
-              >
-                Buy
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* EMPTY */}
-      {filtered.length === 0 && (
-        <div className="text-center text-gray-500 mt-6 text-sm">
-          No products found
+      {/* LOADING */}
+      {loading && (
+        <div className="text-center py-10 text-gray-500">
+          Loading products...
         </div>
       )}
+
+      {/* PRODUCTS */}
+      {!loading && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filtered.map((p, index) => (
+            <motion.div
+              key={p._id}
+              initial={{ opacity: 0, y: 35 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ y: -4 }}
+              className="bg-white border border-gray-200 shadow-sm overflow-hidden"
+            >
+              {/* IMAGE */}
+              <img
+                src={getImage(p)}
+                alt={p.name}
+                className="w-full h-40 object-cover bg-gray-100"
+                onError={(e) => {
+                  e.target.onerror = null; // prevent infinite loop
+                  e.target.src = "/no-image.png";
+                }}
+              />
+
+              {/* CONTENT */}
+              <div className="p-3">
+                <h3 className="text-sm md:text-base font-bold text-gray-800 truncate">
+                  {p.name}
+                </h3>
+
+                <p className="text-xs text-gray-500 mt-1">{p.category}</p>
+
+                <p className="text-yellow-600 font-black text-lg mt-2">
+                  ₹{p.price}
+                </p>
+
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <Link
+                    to={`/product/${p._id}`}
+                    className="text-center text-xs bg-gray-900 text-white py-2 hover:bg-black transition"
+                  >
+                    View
+                  </Link>
+
+                  <button className="text-xs bg-yellow-500 text-white py-2 hover:bg-yellow-600 transition flex items-center justify-center gap-1">
+                    <FaShoppingCart />
+                    Buy
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* EMPTY */}
+      {!loading && filtered.length === 0 && (
+        <div className="bg-white border border-gray-200 text-center py-10 mt-5 shadow-sm">
+          <p className="text-gray-500 text-sm">No products found</p>
+        </div>
+      )}
+
+      {/* SELLER CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 35 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-8 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-5 md:p-8 shadow-lg"
+      >
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h2 className="text-xl md:text-3xl font-black">
+              Sell Your Products on PashuSeva
+            </h2>
+
+            <p className="text-sm md:text-base text-yellow-100 mt-2">
+              Reach thousands of farmers and grow your business online.
+            </p>
+          </div>
+
+          <a
+            href="https://seller.apnapashu.com"
+            target="_blank"
+            rel="noreferrer"
+            className="bg-white text-yellow-600 px-5 py-3 font-bold text-sm flex items-center justify-center gap-2 hover:bg-gray-100 transition"
+          >
+            Become Seller
+            <FaArrowRight />
+          </a>
+        </div>
+      </motion.div>
     </div>
   );
 }

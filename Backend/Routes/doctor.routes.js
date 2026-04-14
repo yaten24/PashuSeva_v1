@@ -1,5 +1,5 @@
 import express from "express"
-import { loginDoctorController, logoutDoctorController, registerDoctorController } from "../Controllers/doctor.controllers.js";
+import { getDoctorsList, loginDoctorController, logoutDoctorController, registerDoctorController } from "../Controllers/doctor.controllers.js";
 import { protectDoctor } from "../Middlewares/doctorAuth.middleware.js";
 
 const router = express.Router();
@@ -14,5 +14,9 @@ router.get("/auth/me", protectDoctor, (req, res) => {
     doctor: req.doctor,
   });
 });
+
+
+router.get("/get-doctors", getDoctorsList);
+
 
 export default router;

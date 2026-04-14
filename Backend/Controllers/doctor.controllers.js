@@ -107,20 +107,27 @@ export const registerDoctorController = async (req, res) => {
       email: email ? email.trim().toLowerCase() : undefined,
       mobile: mobile.trim(),
       password: hashedPassword,
+
       specialization,
       qualification,
-      experience: experience || 0,
+
+      experience: Number(experience) || 0,
       consultationFee: Number(consultationFee),
-      state,
-      city,
+
+      // 🔥 FIXED LOCATION OBJECT
+      location: {
+        city: city.trim(),
+        state: state.trim(),
+      },
+
       aadhaar,
-      status: "pending", // 🔥 admin approval required
+      status: "pending", // admin approval required
     });
 
     const token = jwt.sign(
       { id: doctor._id, role: "doctor" },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     // 🔥 5. Save Token in Cookie
@@ -167,7 +174,6 @@ export const registerDoctorController = async (req, res) => {
 
 import jwt from "jsonwebtoken";
 
-
 export const loginDoctorController = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -201,7 +207,7 @@ export const loginDoctorController = async (req, res) => {
     const token = jwt.sign(
       { id: doctor._id, role: "doctor" },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     // 🔥 5. Save Token in Cookie
@@ -222,7 +228,6 @@ export const loginDoctorController = async (req, res) => {
         specialization: doctor.specialization,
       },
     });
-
   } catch (error) {
     console.error("Doctor Login Error:", error);
 
@@ -241,4 +246,27 @@ export const logoutDoctorController = (req, res) => {
   res.status(200).json({
     message: "Doctor logged out successfully",
   });
+};
+
+export const getDoctorsList = async (req, res) => {
+  try {
+    const doctors = await Doctor.find()
+      .select(
+        "name specialization mobile experience consultationFee location status rating profileImage"
+      )
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: doctors.length,
+      doctors,
+    });
+  } catch (error) {
+    console.log("Get Doctors Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch doctors list",
+    });
+  }
 };

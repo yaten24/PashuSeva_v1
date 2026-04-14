@@ -1,16 +1,10 @@
-// import express from "express";
-// import { createProduct } from "../controllers/productController.js";
-// import upload from "../Middlewares/uploadMiddleware.js"
-// import { protect } from "../middlewares/authMiddleware.js";
+import express from "express";
+import { getAllProducts, getSingleProduct } from "../Controllers/products.controllers.js";
 
-// const router = express.Router();
+const router = express.Router();
 
-// // 🔥 Create Product Route
-// router.post(
-//   "/create",
-//   protect, // JWT auth middleware
-//   upload.array("images", 5), // max 5 images
-//   createProduct
-// );
+// 🔥 GET ALL PRODUCTS
+router.get("/get-products", getAllProducts);
+router.get("/get-product/:id", getSingleProduct);
 
-// export default router;
+export default router;

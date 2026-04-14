@@ -8,11 +8,12 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser"
-
+import path from "path";
 import connectDB from "./Config/db.js";
 import userRoutes from "./Routes/user.routes.js"
 import sellerRoutes from "./Routes/seller.routes.js"
 import doctorRoutes from "./Routes/doctor.routes.js"
+import productRoutes from "./Routes/product.routes.js"
 // ==============================
 // LOAD ENV
 // ==============================
@@ -52,6 +53,16 @@ app.use(
   })
 );
 
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"), {
+    setHeaders: (res) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    },
+  })
+);
+
 // Logging (dev only)
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -68,6 +79,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/user", userRoutes);
 app.use("/api/seller", sellerRoutes);
 app.use("/api/doctor", doctorRoutes);
+app.use("/api/product", productRoutes);
 
 // Health check route
 app.get("/", (req, res) => {
