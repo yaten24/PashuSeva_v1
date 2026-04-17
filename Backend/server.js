@@ -38,6 +38,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "https://apnapashu.com",
+  "https://seller.apnapashu.com",
+  "https://doctor.apnapashu.com",
 ];
 
 app.use(
