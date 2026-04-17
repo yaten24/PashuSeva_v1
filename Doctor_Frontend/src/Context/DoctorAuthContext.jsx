@@ -7,7 +7,7 @@ export const DoctorAuthProvider = ({ children }) => {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const API_URL = import.meta.env.VITE_API_URL || "https://api.apnapashu.com";
 
   // 🔥 FETCH LOGGED-IN DOCTOR
   const fetchDoctor = async () => {
