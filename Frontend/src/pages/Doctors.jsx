@@ -7,17 +7,35 @@ import {
   FaStar,
   FaTimes,
   FaSearch,
+  FaCalendarAlt,
+  FaClock,
+  FaMoneyBillWave,
+  FaPaw,
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 export default function Doctors() {
+  const navigate = useNavigate();
+
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
+
+  const [form, setForm] = useState({
+    animalType: "",
+    problem: "",
+    date: "",
+    time: "",
+    paymentMethod: "onsite",
+  });
+
   const API_URL =
-    import.meta.env.VITE_API_URL || "https://api.apnapashu.com";
+    import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   useEffect(() => {
     fetchDoctors();
@@ -39,22 +57,74 @@ export default function Doctors() {
     }
   };
 
-  // 🔥 SEARCH FIXED FOR location.city / state
   const filtered = doctors.filter((d) => {
-    const query = search.toLowerCase();
-
-    const name = d.name?.toLowerCase() || "";
-    const city = d.location?.city?.toLowerCase() || "";
-    const state = d.location?.state?.toLowerCase() || "";
-    const spec = d.specialization?.toLowerCase() || "";
+    const q = search.toLowerCase();
 
     return (
-      name.includes(query) ||
-      city.includes(query) ||
-      state.includes(query) ||
-      spec.includes(query)
+      d.name?.toLowerCase().includes(q) ||
+      d.specialization?.toLowerCase().includes(q) ||
+      d.location?.city?.toLowerCase().includes(q) ||
+      d.location?.state?.toLowerCase().includes(q)
     );
   });
+
+  const handleBook = async () => {
+    try {
+      if (
+        !form.animalType ||
+        !form.problem ||
+        !form.date ||
+        !form.time
+      ) {
+        return alert("Please fill all fields");
+      }
+
+      if (form.paymentMethod === "online") {
+        navigate("/online", {
+          state: {
+            doctorId: selected._id,
+            doctor: selected,
+            bookingData: form,
+          },
+        });
+        return;
+      }
+
+      setBookingLoading(true);
+
+      const { data } = await axios.post(
+        `${API_URL}/api/appointment/book`,
+        {
+          doctorId: selected._id,
+          animalType: form.animalType,
+          problemDescription: form.problem,
+          date: form.date,
+          time: form.time,
+          paymentMethod: form.paymentMethod,
+        },
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        alert("Appointment Booked Successfully");
+        setBookingOpen(false);
+
+        setForm({
+          animalType: "",
+          problem: "",
+          date: "",
+          time: "",
+          paymentMethod: "onsite",
+        });
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert("Booking failed");
+    } finally {
+      setBookingLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-yellow-50 pb-8">
@@ -87,18 +157,8 @@ export default function Doctors() {
 
       {/* LOADING */}
       {loading && (
-        <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="bg-white border border-gray-200 p-3 animate-pulse"
-            >
-              <div className="h-5 bg-gray-200 w-2/3 mb-3"></div>
-              <div className="h-3 bg-gray-100 w-full mb-2"></div>
-              <div className="h-3 bg-gray-100 w-1/2 mb-2"></div>
-              <div className="h-8 bg-yellow-100 w-20 mt-3"></div>
-            </div>
-          ))}
+        <div className="p-4 text-center font-semibold">
+          Loading doctors...
         </div>
       )}
 
@@ -108,43 +168,26 @@ export default function Doctors() {
           {filtered.map((d, index) => (
             <motion.div
               key={d._id}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.04 }}
-              whileHover={{ y: -4 }}
+              transition={{ delay: index * 0.05 }}
               className="bg-white border border-gray-200 shadow-sm p-3"
             >
-              {/* TOP */}
-              <div className="flex justify-between items-start gap-2">
-                <div>
-                  <h3 className="text-sm md:text-base font-bold text-gray-900">
-                    {d.name}
-                  </h3>
+              <h3 className="font-bold text-sm md:text-base">
+                {d.name}
+              </h3>
 
-                  <p className="text-[11px] text-gray-500">
-                    {d.specialization}
-                  </p>
-                </div>
+              <p className="text-xs text-gray-500">
+                {d.specialization}
+              </p>
 
-                {/* <span
-                  className={`text-[10px] px-2 py-1 font-semibold ${
-                    d.status === "approved"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
-                >
-                  {d.status}
-                </span> */}
-              </div>
-
-              {/* INFO */}
-              <div className="mt-3 space-y-1 text-[11px] text-gray-600">
+              <div className="mt-2 text-xs text-gray-600 space-y-1">
                 <div className="flex items-center gap-1">
                   <FaMapMarkerAlt className="text-yellow-500" />
                   {d.location?.city}, {d.location?.state}
                 </div>
 
-                <div>{d.experience} Years Experience</div>
+                <div>{d.experience} Years Exp.</div>
 
                 <div className="flex items-center gap-1 text-yellow-500">
                   <FaStar />
@@ -152,16 +195,14 @@ export default function Doctors() {
                 </div>
               </div>
 
-              {/* FEE */}
-              <div className="mt-3 text-lg font-black text-yellow-600">
+              <div className="mt-3 text-yellow-600 font-black text-lg">
                 ₹{d.consultationFee}
               </div>
 
-              {/* BUTTONS */}
               <div className="grid grid-cols-2 gap-2 mt-3">
                 <a
                   href={`tel:${d.mobile}`}
-                  className="bg-yellow-500 text-white text-xs py-2 font-bold text-center flex items-center justify-center gap-1"
+                  className="bg-yellow-500 text-white text-xs py-2 font-bold flex justify-center items-center gap-1"
                 >
                   <FaPhoneAlt />
                   Call
@@ -179,30 +220,22 @@ export default function Doctors() {
         </div>
       )}
 
-      {/* EMPTY */}
-      {!loading && filtered.length === 0 && (
-        <div className="text-center py-10 text-gray-500">
-          No doctors found
-        </div>
-      )}
-
-      {/* DRAWER */}
+      {/* DOCTOR DETAIL DRAWER */}
       <AnimatePresence>
         {selected && (
           <motion.div
+            className="fixed inset-0 bg-black/40 z-50 flex justify-end"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 z-50 flex justify-end"
           >
             <motion.div
-              initial={{ x: 350 }}
+              initial={{ x: 400 }}
               animate={{ x: 0 }}
-              exit={{ x: 350 }}
-              className="bg-white w-full sm:w-96 h-full shadow-xl overflow-y-auto"
+              exit={{ x: 400 }}
+              className="bg-white w-full sm:w-96 h-full overflow-y-auto"
             >
-              {/* HEADER */}
-              <div className="flex justify-between items-center px-4 py-4">
+              <div className="flex justify-between items-center p-4 border-b">
                 <h2 className="font-black text-lg">
                   Doctor Details
                 </h2>
@@ -212,13 +245,12 @@ export default function Doctors() {
                 </button>
               </div>
 
-              {/* BODY */}
               <div className="p-4">
-                <div className="w-20 h-20 bg-yellow-100 flex items-center justify-center text-yellow-600 text-3xl mx-auto">
+                <div className="w-20 h-20 mx-auto bg-yellow-100 flex items-center justify-center text-3xl text-yellow-600">
                   <FaUserMd />
                 </div>
 
-                <h3 className="text-center text-xl font-black mt-3">
+                <h3 className="text-center font-black text-xl mt-3">
                   {selected.name}
                 </h3>
 
@@ -231,44 +263,150 @@ export default function Doctors() {
                     label="Location"
                     value={`${selected.location?.city}, ${selected.location?.state}`}
                   />
-
                   <Info
                     label="Experience"
                     value={`${selected.experience} Years`}
                   />
-
                   <Info
-                    label="Consultation Fee"
+                    label="Fee"
                     value={`₹${selected.consultationFee}`}
                   />
-
                   <Info
                     label="Phone"
                     value={selected.mobile}
-                  />
-
-                  <Info
-                    label="Rating"
-                    value={selected.rating || 0}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mt-6">
                   <a
                     href={`tel:${selected.mobile}`}
-                    className="bg-yellow-500 text-white py-3 text-sm font-bold text-center flex items-center justify-center gap-2"
+                    className="bg-yellow-500 text-white py-3 text-sm font-bold text-center flex justify-center items-center gap-2"
                   >
                     <FaPhoneAlt />
                     Call
                   </a>
 
                   <button
-                    onClick={() => setSelected(null)}
-                    className="border border-gray-300 py-3 text-sm font-semibold"
+                    onClick={() => setBookingOpen(true)}
+                    className="bg-gray-900 text-white py-3 text-sm font-bold"
                   >
-                    Close
+                    Book Appointment
                   </button>
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* BOOKING POPUP */}
+      <AnimatePresence>
+        {bookingOpen && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              className="bg-white w-full max-w-md p-5"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="font-black text-lg">
+                  Book Appointment
+                </h2>
+
+                <button
+                  onClick={() => setBookingOpen(false)}
+                >
+                  <FaTimes />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <Input
+                  icon={<FaPaw />}
+                  placeholder="Animal Type"
+                  value={form.animalType}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      animalType: e.target.value,
+                    })
+                  }
+                />
+
+                <textarea
+                  placeholder="Problem Description"
+                  rows="3"
+                  value={form.problem}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      problem: e.target.value,
+                    })
+                  }
+                  className="w-full border px-3 py-2 outline-none"
+                />
+
+                <Input
+                  type="date"
+                  icon={<FaCalendarAlt />}
+                  value={form.date}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      date: e.target.value,
+                    })
+                  }
+                />
+
+                <Input
+                  type="time"
+                  icon={<FaClock />}
+                  value={form.time}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      time: e.target.value,
+                    })
+                  }
+                />
+
+                <div className="border px-3 py-2 flex items-center gap-2">
+                  <FaMoneyBillWave className="text-yellow-500" />
+
+                  <select
+                    value={form.paymentMethod}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        paymentMethod: e.target.value,
+                      })
+                    }
+                    className="w-full outline-none bg-transparent"
+                  >
+                    <option value="onsite">
+                      On Site Payment
+                    </option>
+                    <option value="online">
+                      Online Payment
+                    </option>
+                  </select>
+                </div>
+
+                <button
+                  onClick={handleBook}
+                  disabled={bookingLoading}
+                  className="w-full bg-yellow-500 text-white py-3 font-bold mt-2"
+                >
+                  {bookingLoading
+                    ? "Booking..."
+                    : "Confirm Booking"}
+                </button>
               </div>
             </motion.div>
           </motion.div>
@@ -278,11 +416,33 @@ export default function Doctors() {
   );
 }
 
+function Input({
+  icon,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+}) {
+  return (
+    <div className="border px-3 py-2 flex items-center gap-2">
+      <span className="text-yellow-500">{icon}</span>
+
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full outline-none"
+      />
+    </div>
+  );
+}
+
 function Info({ label, value }) {
   return (
     <div className="border border-gray-200 p-3 bg-gray-50">
-      <p className="text-[11px] text-gray-500">{label}</p>
-      <p className="font-semibold text-gray-900 mt-1">{value}</p>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="font-semibold mt-1">{value}</p>
     </div>
   );
 }

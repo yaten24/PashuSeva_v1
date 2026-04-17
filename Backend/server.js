@@ -14,6 +14,8 @@ import userRoutes from "./Routes/user.routes.js"
 import sellerRoutes from "./Routes/seller.routes.js"
 import doctorRoutes from "./Routes/doctor.routes.js"
 import productRoutes from "./Routes/product.routes.js"
+import appointmentRoutes from "./Routes/appointment.routes.js"
+import orderRoutes from "./Routes/order.routes.js"
 // ==============================
 // LOAD ENV
 // ==============================
@@ -70,6 +72,7 @@ if (process.env.NODE_ENV === "development") {
 
 // Body parser
 app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use("/uploads", express.static("uploads"));
 
@@ -80,6 +83,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/seller", sellerRoutes);
 app.use("/api/doctor", doctorRoutes);
 app.use("/api/product", productRoutes);
+app.use("/api/appointment", appointmentRoutes);
+app.use("/api/order", orderRoutes);
 
 // Health check route
 app.get("/", (req, res) => {

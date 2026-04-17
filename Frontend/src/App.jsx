@@ -44,42 +44,56 @@ import Contact from "./pages/Contact";
 import SearchPage from "./pages/SearchPage";
 import LoginHomePage from "./pages/LoginHomePage";
 import BecomePartnerPage from "./pages/BecomePartnerPage";
+import MyAppointments from "./pages/User/MyAppointments";
+import MyAddresses from "./pages/User/MyAddresses";
+import AddAddress from "./pages/User/AddAddress";
+import Profile from "./pages/Dashboard";
+import MyOrders from "./pages/User/MyOrders";
+import OrderDetails from "./pages/User/OrderDetails";
 
 export default function App() {
   return (
     <>
-    <Toaster position="top-right" />
-    <BrowserRouter>
-      <Routes>
+      <Toaster position="top-right" />
+      <BrowserRouter>
+        <Routes>
+          {/* 🔥 AUTH PAGES (NO LAYOUT) */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* 🔥 AUTH PAGES (NO LAYOUT) */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        
           <Route path="partner-register" element={<BecomePartnerPage />} />
-          
+          <Route path="/my-appointment" element={<MyAppointments />} />
+          <Route path="/your-address" element={<MyAddresses />} />
+          <Route path="/add-address" element={<AddAddress />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/orders" element={<MyOrders />} />
+
+          <Route
+            path="/order/:orderId"
+            element={<OrderDetails />}
+          />
+
           <Route path="product/:id" element={<ProductDetails />} />
 
-        {/* 🔥 MAIN APP (WITH LAYOUT) */}
-        <Route path="/" element={<Layout />}>
+          {/* 🔥 MAIN APP (WITH LAYOUT) */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<LoginHomePage />} />
+            <Route path="about" element={<About />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="search" element={<SearchPage />} />
 
-          <Route index element={<LoginHomePage />} />
-          <Route path="about" element={<About />} />
-          <Route path="contact" element={<Contact />} />
-          <Route path="search" element={<SearchPage />} />
+            {/* Marketplace */}
+            <Route path="marketplace" element={<Marketplace />} />
 
-          {/* Marketplace */}
-          <Route path="marketplace" element={<Marketplace />} />
+            {/* Doctors */}
+            <Route path="doctors" element={<Doctors />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="premium" element={<Premium />} />
 
-          {/* Doctors */}
-          <Route path="doctors" element={<Doctors />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="premium" element={<Premium />} />
-
-          {/* Protected */}
-          {/* <Route
+            {/* Protected */}
+            {/* <Route
             path="dashboard"
             element={
               <ProtectedRoute>
@@ -88,7 +102,7 @@ export default function App() {
             }
           /> */}
 
-          {/* <Route
+            {/* <Route
             path="/premium"
             element={
               <ProtectedRoute>
@@ -97,108 +111,107 @@ export default function App() {
             }
           /> */}
 
-          <Route
-            path="/consultations"
-            element={
-              <ProtectedRoute>
-                <Consultations />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/consultations"
+              element={
+                <ProtectedRoute>
+                  <Consultations />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Seller */}
-          <Route
-            path="/seller/products"
-            element={
-              <RoleRoute allow={["seller"]}>
-                <SellerProducts />
-              </RoleRoute>
-            }
-          />
+            {/* Seller */}
+            <Route
+              path="/seller/products"
+              element={
+                <RoleRoute allow={["seller"]}>
+                  <SellerProducts />
+                </RoleRoute>
+              }
+            />
 
-          <Route
-            path="/seller/products/new"
-            element={
-              <RoleRoute allow={["seller"]}>
-                <ProductForm mode="create" />
-              </RoleRoute>
-            }
-          />
+            <Route
+              path="/seller/products/new"
+              element={
+                <RoleRoute allow={["seller"]}>
+                  <ProductForm mode="create" />
+                </RoleRoute>
+              }
+            />
 
-          <Route
-            path="/seller/products/:id/edit"
-            element={
-              <RoleRoute allow={["seller"]}>
-                <ProductForm mode="edit" />
-              </RoleRoute>
-            }
-          />
+            <Route
+              path="/seller/products/:id/edit"
+              element={
+                <RoleRoute allow={["seller"]}>
+                  <ProductForm mode="edit" />
+                </RoleRoute>
+              }
+            />
 
-          {/* Doctor */}
-          <Route
-            path="/doctor/profile"
-            element={
-              <RoleRoute allow={["doctor"]}>
-                <DoctorProfile />
-              </RoleRoute>
-            }
-          />
+            {/* Doctor */}
+            <Route
+              path="/doctor/profile"
+              element={
+                <RoleRoute allow={["doctor"]}>
+                  <DoctorProfile />
+                </RoleRoute>
+              }
+            />
 
-          {/* Admin */}
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            }
-          />
+            {/* Admin */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              }
+            />
 
-          <Route
-            path="/admin/users"
-            element={
-              <AdminRoute>
-                <AdminUsers />
-              </AdminRoute>
-            }
-          />
+            <Route
+              path="/admin/users"
+              element={
+                <AdminRoute>
+                  <AdminUsers />
+                </AdminRoute>
+              }
+            />
 
-          <Route
-            path="/admin/doctors"
-            element={
-              <AdminRoute>
-                <AdminVerifyDoctors />
-              </AdminRoute>
-            }
-          />
+            <Route
+              path="/admin/doctors"
+              element={
+                <AdminRoute>
+                  <AdminVerifyDoctors />
+                </AdminRoute>
+              }
+            />
 
-          <Route
-            path="/admin/products"
-            element={
-              <AdminRoute>
-                <AdminModerateProducts />
-              </AdminRoute>
-            }
-          />
+            <Route
+              path="/admin/products"
+              element={
+                <AdminRoute>
+                  <AdminModerateProducts />
+                </AdminRoute>
+              }
+            />
 
-          <Route
-            path="/admin/subscriptions"
-            element={
-              <AdminRoute>
-                <AdminSubscriptions />
-              </AdminRoute>
-            }
-          />
+            <Route
+              path="/admin/subscriptions"
+              element={
+                <AdminRoute>
+                  <AdminSubscriptions />
+                </AdminRoute>
+              }
+            />
 
-          {/* 404 inside layout */}
+            {/* 404 inside layout */}
+            <Route path="*" element={<NotFound />} />
+          </Route>
+
+          {/* global 404 */}
           <Route path="*" element={<NotFound />} />
-        </Route>
-
-        {/* global 404 */}
-        <Route path="*" element={<NotFound />} />
-
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
     </>
   );
 }

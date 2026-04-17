@@ -16,8 +16,30 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
+
+    address: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Address",
+      required: true,
+    },
+
     // 🔹 Pricing
     totalAmount: {
+      type: Number,
+      required: true,
+    },
+
+    price: {
+      type: Number,
+      required: true,
+    },
+
+    gst: {
       type: Number,
       required: true,
     },
@@ -27,8 +49,13 @@ const orderSchema = new mongoose.Schema(
       default: 0,
     },
 
-    sellerEarning: {
+    deliveryFee: {
       type: Number,
+      default: 0,
+    },
+
+    transactionId: {
+      type: String,
     },
 
     // 🔹 Payment Info

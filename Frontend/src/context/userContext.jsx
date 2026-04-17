@@ -10,7 +10,7 @@ export const UserProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const res = await axios.get(
-        "https://api.apnapashu.com/api/user/auth/me",
+        "http://localhost:5000/api/user/auth/me",
         { withCredentials: true } // VERY IMPORTANT for cookies
       )
       setUser(res.data.user);

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const consultationSchema = new mongoose.Schema(
+const appointmentSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -43,7 +43,7 @@ const consultationSchema = new mongoose.Schema(
 
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid"],
+      enum: ["pending", "paid", "cash"],
       default: "pending",
     },
 
@@ -63,4 +63,4 @@ const consultationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Consultation", consultationSchema);
+export default mongoose.model("Appointment", appointmentSchema);

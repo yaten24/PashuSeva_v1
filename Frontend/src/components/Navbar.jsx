@@ -125,21 +125,50 @@ export default function Navbar() {
             {loading ? (
               <span className="text-sm text-gray-400">Loading...</span>
             ) : isLoggedIn ? (
-              <div
-                onClick={() => navigate("/profile")}
-                className="flex items-center gap-3 px-3 py-2 bg-yellow-50 cursor-pointer border border-yellow-200"
-              >
-                <div className="w-10 h-10 bg-yellow-500 text-white flex items-center justify-center font-bold">
-                  {user?.name?.charAt(0)?.toUpperCase()}
-                </div>
+<motion.div
+  initial={{
+    opacity: 0,
+    x: -15,
+  }}
+  animate={{
+    opacity: 1,
+    x: 0,
+  }}
+  whileHover={{
+    scale: 1.01,
+  }}
+  whileTap={{
+    scale: 0.97,
+  }}
+  transition={{
+    duration: 0.2,
+  }}
+  onClick={() => navigate("/profile")}
+  className="flex items-center gap-1.5 px-2 py-1 bg-yellow-50 cursor-pointer border border-yellow-200 hover:bg-yellow-100 h-9"
+>
+  {/* Avatar */}
+  <motion.div
+    whileHover={{
+      rotate: 5,
+    }}
+    className="w-6 h-6 bg-yellow-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0"
+  >
+    {user?.name
+      ?.charAt(0)
+      ?.toUpperCase()}
+  </motion.div>
 
-                <div>
-                  <p className="text-sm font-bold text-gray-800">
-                    {user?.name}
-                  </p>
-                  <p className="text-xs text-gray-500">My Profile</p>
-                </div>
-              </div>
+  {/* Info */}
+  <div className="leading-tight min-w-0">
+    <p className="text-[11px] font-bold text-gray-800 truncate max-w-[90px]">
+      {user?.name}
+    </p>
+
+    <p className="text-[9px] text-gray-500 -mt-[1px]">
+      Profile
+    </p>
+  </div>
+</motion.div>
             ) : (
               <>
                 <NavLink
