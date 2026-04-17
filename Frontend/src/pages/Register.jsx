@@ -45,7 +45,7 @@ export default function Register() {
       setLoading(true);
 
       await axios.post(
-        "http://localhost:5000/api/user/register",
+        "https://api.apnapashu.com/api/user/register",
         {
           name: form.name,
           email: form.email,

@@ -11,7 +11,7 @@ const SellerContext = createContext();
 
 // 🔥 axios instance (best practice)
 const api = axios.create({
-  baseURL: "http://localhost:5000" ,
+  baseURL: "https://api.apnapashu.com" ,
   withCredentials: true, // cookie auto send
 });
 

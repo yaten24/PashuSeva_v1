@@ -22,7 +22,7 @@ export default function MyAppointments() {
 
   const API =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:5000";
+    "https://api.apnapashu.com";
 
   useEffect(() => {
     fetchAppointments();

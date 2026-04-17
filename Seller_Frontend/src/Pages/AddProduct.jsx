@@ -86,7 +86,7 @@ const AddProduct = () => {
       images.forEach((img) => data.append("images", img));
 
       await axios.post(
-        "http://localhost:5000/api/seller/product/create",
+        "https://api.apnapashu.com/api/seller/product/create",
         data,
         {
           withCredentials: true, // 🔥 FIX (cookie based)

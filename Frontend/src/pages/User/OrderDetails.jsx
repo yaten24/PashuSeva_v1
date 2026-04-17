@@ -26,7 +26,7 @@ export default function OrderDetails() {
 
   const API =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:5000";
+    "https://api.apnapashu.com";
 
   const [loading, setLoading] =
     useState(true);
