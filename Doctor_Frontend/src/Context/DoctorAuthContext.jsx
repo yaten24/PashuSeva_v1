@@ -29,11 +29,9 @@ export const DoctorAuthProvider = ({ children }) => {
   // 🔥 REGISTER FUNCTION
   const registerDoctor = async (formData) => {
     try {
-      const res = await axios.post(
-        `${API_URL}/api/doctor/register`,
-        formData,
-        { withCredentials: true }
-      );
+      const res = await axios.post(`${API_URL}/api/doctor/register`, formData, {
+        withCredentials: true,
+      });
 
       if (res.data.success) {
         // 🔥 OPTION 1: Auto login after register
@@ -56,21 +54,38 @@ export const DoctorAuthProvider = ({ children }) => {
   // 🔥 LOGIN FUNCTION
   const loginDoctor = async (formData) => {
     try {
-      const res = await axios.post(
+      const { data } = await axios.post(
         `${API_URL}/api/doctor/login`,
         formData,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        },
       );
-      console.log(res)
 
-      if (res.data.success) {
-        setDoctor(res.data.doctor);
-        return { success: true };
+      if (!data?.success) {
+        return {
+          success: false,
+          message: data?.message || "Login failed",
+        };
       }
+
+      // Update Context
+      setDoctor(data.doctor);
+
+      // Optional Local Storage
+      localStorage.setItem("doctor", JSON.stringify(data.doctor));
+
+      return {
+        success: true,
+        doctor: data.doctor,
+        message: data.message || "Login successful",
+      };
     } catch (err) {
+      console.error("Doctor Login Error:", err);
+
       return {
         success: false,
-        message: err.response?.data?.message || "Login failed",
+        message: err?.response?.data?.message || err?.message || "Login failed",
       };
     }
   };
@@ -81,7 +96,7 @@ export const DoctorAuthProvider = ({ children }) => {
       await axios.post(
         `${API_URL}/api/doctor/logout`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
       setDoctor(null);
     } catch (err) {
