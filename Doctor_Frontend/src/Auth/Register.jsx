@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDoctorAuth } from "../Context/DoctorAuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { FaUserMd, FaCalendarCheck, FaRupeeSign } from "react-icons/fa";
 import {
   Eye,
   EyeOff,
@@ -13,6 +12,7 @@ import {
   Briefcase,
   DollarSign,
   MapPin,
+  Stethoscope,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -22,6 +22,7 @@ const DoctorRegister = () => {
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
@@ -39,62 +40,98 @@ const DoctorRegister = () => {
     aadhaar: "",
   });
 
-  // 🔥 FETCH STATES
+  // ================= FETCH STATES =================
   useEffect(() => {
     fetch("https://countriesnow.space/api/v0.1/countries/states", {
       method: "POST",
       body: JSON.stringify({ country: "India" }),
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
     })
       .then((res) => res.json())
-      .then((data) => setStates(data.data.states));
+      .then((data) => {
+        setStates(data?.data?.states || []);
+      })
+      .catch((err) => console.log(err));
   }, []);
 
-  // 🔥 FETCH CITIES
+  // ================= HANDLE STATE =================
   const handleStateChange = async (e) => {
     const selectedState = e.target.value;
 
-    setFormData({ ...formData, state: selectedState, city: "" });
+    setFormData((prev) => ({
+      ...prev,
+      state: selectedState,
+      city: "",
+    }));
 
-    const res = await fetch(
-      "https://countriesnow.space/api/v0.1/countries/state/cities",
-      {
-        method: "POST",
-        body: JSON.stringify({ country: "India", state: selectedState }),
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    try {
+      const res = await fetch(
+        "https://countriesnow.space/api/v0.1/countries/state/cities",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            country: "India",
+            state: selectedState,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    const data = await res.json();
-    setCities(data.data);
+      const data = await res.json();
+
+      setCities(data?.data || []);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
+  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // 🔥 SUBMIT
+  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await registerDoctor(formData);
+      const res = await registerDoctor(formData);
 
-    if (res.success) {
-      toast.success(res.message || "Registered Successfully");
-      navigate("/doctor/dashboard");
-    } else {
-      toast.error(res.message);
+      if (res?.success) {
+        toast.success(res?.message || "Registered Successfully");
+
+        navigate("/doctor/dashboard");
+      } else {
+        toast.error(res?.message || "Registration Failed");
+      }
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Something went wrong"
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
-  // 🔥 ANIMATION
+  // ================= ANIMATION =================
   const container = {
     hidden: {},
-    show: {
+    visible: {
       transition: {
         staggerChildren: 0.08,
       },
@@ -102,189 +139,278 @@ const DoctorRegister = () => {
   };
 
   const item = {
-    hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0 },
+    hidden: {
+      opacity: 0,
+      y: 12,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+    },
   };
 
   return (
-    <div className="h-screen flex bg-gray-100">
-
-      {/* 🔥 LEFT SIDE */}
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-3 py-6">
+      {/* REGISTER BOX */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="hidden md:flex w-1/2 relative text-white items-center justify-center px-10"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1588776814546-1ffcf47267a5')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+        variants={container}
+        initial="hidden"
+        animate="visible"
+        className="w-full max-w-3xl bg-white border border-gray-200 shadow-sm p-4 sm:p-6"
       >
-        <div className="absolute inset-0 bg-black/70"></div>
-
+        {/* HEADER */}
         <motion.div
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          className="relative z-10 max-w-md text-center"
+          variants={item}
+          className="flex flex-col items-center mb-6"
         >
-          <h1 className="text-3xl font-bold">
-            Join <span className="text-green-400">PashuSeva</span>
-          </h1>
-
-          <p className="mt-4 text-gray-200 text-sm">
-            Build your digital veterinary practice and connect with farmers.
-          </p>
-
-          <div className="mt-6 space-y-3 text-left">
-            <div className="flex items-center gap-3 bg-white/10 px-3 py-2 border border-white/20">
-              <FaUserMd className="text-green-400" />
-              <span>Verified Doctor Profile</span>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 px-3 py-2 border border-white/20">
-              <FaCalendarCheck className="text-green-400" />
-              <span>Easy Appointment Management</span>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 px-3 py-2 border border-white/20">
-              <FaRupeeSign className="text-green-400" />
-              <span>Increase Your Earnings</span>
-            </div>
+          <div className="w-14 h-14 bg-green-100 flex items-center justify-center mb-3">
+            <Stethoscope className="text-green-600" size={28} />
           </div>
-        </motion.div>
-      </motion.div>
 
-      {/* 🔥 RIGHT FORM */}
-      <div className="w-full md:w-1/2 flex items-center justify-center px-3">
-
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="w-full max-w-md bg-white p-3 shadow-md border border-gray-300 rounded-lg"
-        >
-          <motion.h2
-            variants={item}
-            className="text-lg font-semibold mb-3 text-center"
-          >
+          <h2 className="text-2xl font-bold text-gray-800">
             Doctor Register
-          </motion.h2>
+          </h2>
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-1.5">
-
-            <Field item={item}>
-              <Input icon={<User size={14} />} name="name" placeholder="Name" onChange={handleChange} />
-            </Field>
-
-            <Field item={item}>
-              <Input icon={<Phone size={14} />} name="mobile" placeholder="Mobile" onChange={handleChange} />
-            </Field>
-
-            <Field item={item}>
-              <Input icon={<Mail size={14} />} name="email" placeholder="Email" onChange={handleChange} />
-            </Field>
-
-            <Field item={item}>
-              <Input icon={<User size={14} />} name="aadhaar" placeholder="Aadhaar" onChange={handleChange} />
-            </Field>
-
-            <Field item={item}>
-              <Select icon={<Briefcase size={14} />} name="qualification"
-                options={["B.V.Sc", "M.V.Sc", "PhD"]}
-                onChange={handleChange} placeholder="Qualification"
-              />
-            </Field>
-
-            <Field item={item}>
-              <Select icon={<Briefcase size={14} />} name="specialization"
-                options={["General", "Surgery", "Dairy"]}
-                onChange={handleChange} placeholder="Specialization"
-              />
-            </Field>
-
-            <Field item={item}>
-              <Select icon={<MapPin size={14} />} name="state"
-                options={states.map((s) => s.name)}
-                onChange={handleStateChange} placeholder="State"
-              />
-            </Field>
-
-            <Field item={item}>
-              <Select icon={<MapPin size={14} />} name="city"
-                options={cities}
-                onChange={handleChange} placeholder="City"
-              />
-            </Field>
-
-            <Field item={item}>
-              <Input icon={<Briefcase size={14} />} name="experience" placeholder="Exp" onChange={handleChange} />
-            </Field>
-
-            <Field item={item}>
-              <Input icon={<DollarSign size={14} />} name="consultationFee" placeholder="Fee" onChange={handleChange} />
-            </Field>
-
-            {/* PASSWORD */}
-            <motion.div
-              variants={item}
-              className="col-span-2 flex items-center border border-gray-300 px-2 py-1.5 rounded-md focus-within:border-green-600"
-            >
-              <Lock size={14} className="mr-2 text-gray-500" />
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                className="w-full outline-none text-xs"
-                onChange={handleChange}
-              />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
-            </motion.div>
-
-            {/* BUTTON */}
-            <motion.button
-              variants={item}
-              type="submit"
-              disabled={loading}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
-              className="col-span-2 bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-md text-xs font-semibold disabled:opacity-50"
-            >
-              {loading ? "Registering..." : "Register"}
-            </motion.button>
-
-          </form>
+          <p className="text-sm text-gray-500 mt-1">
+            Create your doctor account
+          </p>
         </motion.div>
-      </div>
+
+        {/* FORM */}
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+        >
+          {/* NAME */}
+          <Field item={item}>
+            <Input
+              icon={<User size={16} />}
+              name="name"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={handleChange}
+            />
+          </Field>
+
+          {/* MOBILE */}
+          <Field item={item}>
+            <Input
+              icon={<Phone size={16} />}
+              name="mobile"
+              placeholder="Mobile Number"
+              value={formData.mobile}
+              onChange={handleChange}
+            />
+          </Field>
+
+          {/* EMAIL */}
+          <Field item={item}>
+            <Input
+              icon={<Mail size={16} />}
+              name="email"
+              type="email"
+              placeholder="Email Address"
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </Field>
+
+          {/* AADHAAR */}
+          <Field item={item}>
+            <Input
+              icon={<User size={16} />}
+              name="aadhaar"
+              placeholder="Aadhaar Number"
+              value={formData.aadhaar}
+              onChange={handleChange}
+            />
+          </Field>
+
+          {/* QUALIFICATION */}
+          <Field item={item}>
+            <Select
+              icon={<Briefcase size={16} />}
+              name="qualification"
+              value={formData.qualification}
+              onChange={handleChange}
+              placeholder="Qualification"
+              options={["B.V.Sc", "M.V.Sc", "PhD"]}
+            />
+          </Field>
+
+          {/* SPECIALIZATION */}
+          <Field item={item}>
+            <Select
+              icon={<Briefcase size={16} />}
+              name="specialization"
+              value={formData.specialization}
+              onChange={handleChange}
+              placeholder="Specialization"
+              options={[
+                "General",
+                "Surgery",
+                "Dairy",
+                "Veterinary",
+              ]}
+            />
+          </Field>
+
+          {/* STATE */}
+          <Field item={item}>
+            <Select
+              icon={<MapPin size={16} />}
+              name="state"
+              value={formData.state}
+              onChange={handleStateChange}
+              placeholder="Select State"
+              options={states.map((s) => s.name)}
+            />
+          </Field>
+
+          {/* CITY */}
+          <Field item={item}>
+            <Select
+              icon={<MapPin size={16} />}
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              placeholder="Select City"
+              options={cities}
+            />
+          </Field>
+
+          {/* EXPERIENCE */}
+          <Field item={item}>
+            <Input
+              icon={<Briefcase size={16} />}
+              name="experience"
+              placeholder="Experience"
+              value={formData.experience}
+              onChange={handleChange}
+            />
+          </Field>
+
+          {/* CONSULTATION FEE */}
+          <Field item={item}>
+            <Input
+              icon={<DollarSign size={16} />}
+              name="consultationFee"
+              placeholder="Consultation Fee"
+              value={formData.consultationFee}
+              onChange={handleChange}
+            />
+          </Field>
+
+          {/* PASSWORD */}
+          <motion.div
+            variants={item}
+            className="sm:col-span-2 flex items-center border border-gray-300 px-4 py-3 focus-within:border-green-600 transition"
+          >
+            <Lock size={16} className="text-gray-400 mr-3" />
+
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full outline-none text-sm"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-gray-500"
+            >
+              {showPassword ? (
+                <EyeOff size={18} />
+              ) : (
+                <Eye size={18} />
+              )}
+            </button>
+          </motion.div>
+
+          {/* BUTTON */}
+          <motion.button
+            variants={item}
+            type="submit"
+            disabled={loading}
+            whileTap={{ scale: 0.98 }}
+            className="sm:col-span-2 bg-green-600 hover:bg-green-700 text-white py-3 font-semibold transition disabled:opacity-60"
+          >
+            {loading ? "Registering..." : "Register"}
+          </motion.button>
+        </form>
+
+        {/* FOOTER */}
+        <motion.p
+          variants={item}
+          className="text-center text-sm text-gray-600 mt-5"
+        >
+          Already have an account?{" "}
+          <Link
+            to="/doctor/login"
+            className="text-green-600 font-semibold hover:underline"
+          >
+            Login
+          </Link>
+        </motion.p>
+      </motion.div>
     </div>
   );
 };
 
-// 🔥 WRAPPER FOR ANIMATION
-const Field = ({ children, item }) => (
-  <motion.div variants={item}>{children}</motion.div>
-);
+/* ================= FIELD ================= */
 
-// 🔥 INPUT
-const Input = ({ icon, ...props }) => (
-  <div className="flex items-center border border-gray-300 px-2 py-1.5 rounded-md focus-within:border-green-600">
-    <span className="mr-2 text-gray-500">{icon}</span>
-    <input className="w-full outline-none text-xs" {...props} />
-  </div>
-);
+const Field = ({ children, item }) => {
+  return <motion.div variants={item}>{children}</motion.div>;
+};
 
-// 🔥 SELECT
-const Select = ({ icon, options, placeholder, ...props }) => (
-  <div className="flex items-center border border-gray-300 px-2 py-1.5 rounded-md focus-within:border-green-600">
-    <span className="mr-2 text-gray-500">{icon}</span>
-    <select className="w-full outline-none text-xs bg-transparent" {...props}>
-      <option value="">{placeholder}</option>
-      {options.map((opt, i) => (
-        <option key={i}>{opt}</option>
-      ))}
-    </select>
-  </div>
-);
+/* ================= INPUT ================= */
+
+const Input = ({ icon, ...props }) => {
+  return (
+    <div className="flex items-center border border-gray-300 px-4 py-3 focus-within:border-green-600 transition">
+      <span className="mr-3 text-gray-400">
+        {icon}
+      </span>
+
+      <input
+        className="w-full outline-none text-sm bg-transparent"
+        {...props}
+      />
+    </div>
+  );
+};
+
+/* ================= SELECT ================= */
+
+const Select = ({
+  icon,
+  options,
+  placeholder,
+  ...props
+}) => {
+  return (
+    <div className="flex items-center border border-gray-300 px-4 py-3 focus-within:border-green-600 transition">
+      <span className="mr-3 text-gray-400">
+        {icon}
+      </span>
+
+      <select
+        className="w-full outline-none text-sm bg-transparent"
+        {...props}
+      >
+        <option value="">{placeholder}</option>
+
+        {options.map((opt, index) => (
+          <option key={index} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
 
 export default DoctorRegister;

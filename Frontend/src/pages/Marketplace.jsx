@@ -18,29 +18,24 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Marketplace() {
   const navigate = useNavigate();
 
-  const API =
-    import.meta.env.VITE_API_URL ||
-    "https://api.apnapashu.com";
+  const API = import.meta.env.VITE_API_URL || "https://api.apnapashu.com";
 
   const [q, setQ] = useState("");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [addresses, setAddresses] = useState([]);
-  const [selectedAddress, setSelectedAddress] =
-    useState("");
+  const [selectedAddress, setSelectedAddress] = useState("");
 
-  const [showBuyModal, setShowBuyModal] =
-    useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
 
-  const [selectedProduct, setSelectedProduct] =
-    useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const [paymentMethod, setPaymentMethod] =
-    useState("cod");
+  const [paymentMethod, setPaymentMethod] = useState("cod");
 
-  const [placingOrder, setPlacingOrder] =
-    useState(false);
+  const [placingOrder, setPlacingOrder] = useState(false);
+
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     fetchProducts();
@@ -49,9 +44,7 @@ export default function Marketplace() {
 
   const fetchProducts = async () => {
     try {
-      const { data } = await axios.get(
-        `${API}/api/product/get-products`
-      );
+      const { data } = await axios.get(`${API}/api/product/get-products`);
 
       if (data.success) {
         setProducts(data.products || []);
@@ -65,20 +58,15 @@ export default function Marketplace() {
 
   const fetchAddresses = async () => {
     try {
-      const { data } = await axios.get(
-        `${API}/api/user/address/get`,
-        {
-          withCredentials: true,
-        }
-      );
+      const { data } = await axios.get(`${API}/api/user/address/get`, {
+        withCredentials: true,
+      });
 
       if (data.success) {
         setAddresses(data.addresses || []);
 
         if (data.addresses?.length > 0) {
-          setSelectedAddress(
-            data.addresses[0]._id
-          );
+          setSelectedAddress(data.addresses[0]._id);
         }
       }
     } catch (error) {
@@ -88,9 +76,7 @@ export default function Marketplace() {
 
   const filtered = useMemo(() => {
     return products.filter((item) =>
-      item.name
-        .toLowerCase()
-        .includes(q.toLowerCase())
+      item.name.toLowerCase().includes(q.toLowerCase()),
     );
   }, [q, products]);
 
@@ -107,9 +93,7 @@ export default function Marketplace() {
       return "https://via.placeholder.com/300x300?text=No+Image";
     }
 
-    imagePath = imagePath
-      .replaceAll("\\", "/")
-      .trim();
+    imagePath = imagePath.replaceAll("\\", "/").trim();
 
     if (!imagePath.startsWith("uploads")) {
       imagePath = `uploads/${imagePath}`;
@@ -121,46 +105,36 @@ export default function Marketplace() {
   const handleBuyClick = (product) => {
     setSelectedProduct(product);
     setPaymentMethod("cod");
+    setQuantity(1);
     setShowBuyModal(true);
 
-    if (
-      addresses.length > 0 &&
-      !selectedAddress
-    ) {
-      setSelectedAddress(
-        addresses[0]._id
-      );
+    if (addresses.length > 0 && !selectedAddress) {
+      setSelectedAddress(addresses[0]._id);
     }
   };
 
   const handlePlaceOrder = async () => {
-    const price = Number(
-      selectedProduct.price
-    );
+    const price = Number(selectedProduct.price);
 
-    const gst = Math.round(
-      price * 0.05
-    );
+    const subtotal = price * quantity;
+
+    const gst = Math.round(subtotal * 0.05);
 
     const platformFee = 10;
-    const delivery = 40;
 
-    const total =
-      price +
-      gst +
-      platformFee +
-      delivery;
+    const delivery = quantity >= 5 ? 0 : 40;
+
+    const total = subtotal + gst + platformFee + delivery;
 
     if (!selectedAddress) {
-      return alert(
-        "Please select delivery address"
-      );
+      return alert("Please select delivery address");
     }
 
     if (paymentMethod === "online") {
       navigate("/online", {
         state: {
           product: selectedProduct,
+          quantity,
           amount: total,
           addressId: selectedAddress,
         },
@@ -174,15 +148,16 @@ export default function Marketplace() {
       await axios.post(
         `${API}/api/order/buy-product`,
         {
-          productId:
-            selectedProduct._id,
+          productId: selectedProduct._id,
 
-          addressId:
-            selectedAddress,
+          quantity,
+
+          addressId: selectedAddress,
 
           paymentMethod: "cash",
 
           price,
+          subtotal,
           gst,
           platformFee,
           delivery,
@@ -190,14 +165,13 @@ export default function Marketplace() {
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
-      alert(
-        "Order Placed Successfully"
-      );
+      alert("Order Placed Successfully");
 
       setShowBuyModal(false);
+      setQuantity(1);
     } catch (error) {
       alert("Order Failed");
     } finally {
@@ -211,15 +185,10 @@ export default function Marketplace() {
       <div className="sticky top-0 z-40 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 shadow-md border-b border-orange-400">
         <div className="px-2 md:px-4 py-2.5">
           <div className="flex items-center gap-2 md:gap-3">
-            <Link
-              to="/"
-              className="shrink-0 leading-none"
-            >
+            <Link to="/" className="shrink-0 leading-none">
               <h2 className="text-white font-black text-sm md:text-2xl tracking-tight">
                 Apna
-                <span className="text-yellow-100">
-                  Pashu
-                </span>
+                <span className="text-yellow-100">Pashu</span>
               </h2>
 
               <p className="hidden md:block text-[10px] text-orange-100 font-medium -mt-0.5">
@@ -233,11 +202,7 @@ export default function Marketplace() {
 
                 <input
                   value={q}
-                  onChange={(e) =>
-                    setQ(
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => setQ(e.target.value)}
                   placeholder="Search products..."
                   className="w-full px-2 text-xs md:text-sm outline-none"
                 />
@@ -257,14 +222,11 @@ export default function Marketplace() {
               </p>
 
               <h2 className="text-lg md:text-3xl font-black text-gray-900 mt-1">
-                Become Seller on
-                ApnaPashu
+                Become Seller on ApnaPashu
               </h2>
 
               <p className="text-xs md:text-sm text-gray-600 mt-2">
-                Sell feed, bhusa,
-                chara & farm products
-                to thousands of buyers.
+                Sell feed, bhusa, chara & farm products to thousands of buyers.
               </p>
 
               <div className="grid grid-cols-2 gap-2 mt-4 text-[11px]">
@@ -301,39 +263,23 @@ export default function Marketplace() {
 
             <div className="hidden md:grid grid-cols-2 gap-3">
               <div className="bg-white border border-orange-200 p-3">
-                <p className="text-xs text-gray-500">
-                  Growth
-                </p>
-                <h3 className="text-2xl font-black text-orange-500">
-                  +120%
-                </h3>
+                <p className="text-xs text-gray-500">Growth</p>
+                <h3 className="text-2xl font-black text-orange-500">+120%</h3>
               </div>
 
               <div className="bg-white border border-orange-200 p-3">
-                <p className="text-xs text-gray-500">
-                  Customers
-                </p>
-                <h3 className="text-2xl font-black text-orange-500">
-                  10K+
-                </h3>
+                <p className="text-xs text-gray-500">Customers</p>
+                <h3 className="text-2xl font-black text-orange-500">10K+</h3>
               </div>
 
               <div className="bg-white border border-orange-200 p-3">
-                <p className="text-xs text-gray-500">
-                  Orders
-                </p>
-                <h3 className="text-2xl font-black text-orange-500">
-                  50K+
-                </h3>
+                <p className="text-xs text-gray-500">Orders</p>
+                <h3 className="text-2xl font-black text-orange-500">50K+</h3>
               </div>
 
               <div className="bg-white border border-orange-200 p-3">
-                <p className="text-xs text-gray-500">
-                  Setup
-                </p>
-                <h3 className="text-2xl font-black text-orange-500">
-                  0 Cost
-                </h3>
+                <p className="text-xs text-gray-500">Setup</p>
+                <h3 className="text-2xl font-black text-orange-500">0 Cost</h3>
               </div>
             </div>
           </div>
@@ -343,9 +289,7 @@ export default function Marketplace() {
       {/* PRODUCTS */}
       <div className="px-2 md:px-4 pb-4">
         {loading ? (
-          <div className="text-center py-10">
-            Loading...
-          </div>
+          <div className="text-center py-10">Loading...</div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-[6px]">
             {filtered.map((p) => (
@@ -356,9 +300,7 @@ export default function Marketplace() {
                 }}
                 className="bg-white border border-gray-200 overflow-hidden"
               >
-                <Link
-                  to={`/product/${p._id}`}
-                >
+                <Link to={`/product/${p._id}`}>
                   <img
                     src={getImage(p)}
                     alt={p.name}
@@ -371,9 +313,7 @@ export default function Marketplace() {
                     {p.name}
                   </h3>
 
-                  <p className="text-[10px] text-gray-500 mt-1">
-                    {p.category}
-                  </p>
+                  <p className="text-[10px] text-gray-500 mt-1">{p.category}</p>
 
                   <p className="text-sm font-black text-orange-500 mt-1">
                     ₹{p.price}
@@ -388,11 +328,7 @@ export default function Marketplace() {
                     </Link>
 
                     <button
-                      onClick={() =>
-                        handleBuyClick(
-                          p
-                        )
-                      }
+                      onClick={() => handleBuyClick(p)}
                       className="text-[10px] bg-orange-500 text-white py-1.5 flex justify-center items-center gap-1 font-semibold"
                     >
                       <FaBolt size={9} />
@@ -408,293 +344,233 @@ export default function Marketplace() {
 
       {/* BUY MODAL */}
       <AnimatePresence>
-        {showBuyModal &&
-          selectedProduct && (
+        {showBuyModal && selectedProduct && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/60 flex justify-center items-start pt-48 px-5 overflow-y-auto"
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            exit={{
+              opacity: 0,
+            }}
+          >
             <motion.div
-              className="fixed inset-0 z-50 bg-black/60 flex justify-center items-end md:items-center px-2"
               initial={{
                 opacity: 0,
+                y: 5,
+                scale: 0.92,
               }}
               animate={{
                 opacity: 1,
+                y: 0,
+                scale: 1,
               }}
               exit={{
                 opacity: 0,
+                y: 5,
               }}
+              className="bg-white w-full md:max-w-md border border-orange-200 shadow-2xl"
             >
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 80,
-                  scale: 0.92,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  scale: 1,
-                }}
-                exit={{
-                  opacity: 0,
-                  y: 80,
-                }}
-                className="bg-white w-full md:max-w-md border border-orange-200 shadow-2xl"
-              >
-                {/* HEADER */}
-                <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3 flex justify-between items-center">
-                  <div>
-                    <h2 className="text-white font-black text-lg">
-                      Buy Product
-                    </h2>
+              {/* HEADER */}
+              <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3 flex justify-between items-center">
+                <div>
+                  <h2 className="text-white font-black text-lg">Buy Product</h2>
 
-                    <p className="text-orange-100 text-[11px]">
-                      Fast Checkout
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      setShowBuyModal(
-                        false
-                      )
-                    }
-                    className="text-white"
-                  >
-                    <FaTimes />
-                  </button>
+                  <p className="text-orange-100 text-[11px]">Fast Checkout</p>
                 </div>
 
-                <div className="p-4">
-                  <div className="bg-orange-50 border border-orange-100 p-3">
-                    <p className="text-[11px] text-orange-600 font-bold uppercase">
+                <button
+                  onClick={() => setShowBuyModal(false)}
+                  className="text-white"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+
+              <div className="p-3">
+                {/* PRODUCT + QUANTITY */}
+                <div className="grid grid-cols-[2fr_auto] gap-3">
+                  <div className="bg-orange-50 border-2 border-orange-200 p-2">
+                    <p className="text-[10px] text-orange-600 font-bold uppercase">
                       Product
                     </p>
 
-                    <h3 className="font-bold text-sm mt-1">
-                      {
-                        selectedProduct.name
-                      }
+                    <h3 className="font-bold text-xs mt-1 line-clamp-2">
+                      {selectedProduct.name}
                     </h3>
+
+                    <p className="text-orange-600 font-black text-sm mt-1">
+                      ₹{selectedProduct.price}
+                    </p>
                   </div>
 
-                  {(() => {
-                    const price =
-                      Number(
-                        selectedProduct.price
-                      );
+                  <div className="border-2 border-orange-200">
+                    <div className="text-[10px] text-center py-1 bg-orange-50 border-b border-orange-200 font-bold">
+                      Qty
+                    </div>
 
-                    const gst =
-                      Math.round(
-                        price *
-                          0.05
-                      );
+                    <div className="flex items-center">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setQuantity((prev) => (prev > 1 ? prev - 1 : 1))
+                        }
+                        className="w-8 h-8 bg-orange-50 hover:bg-orange-100 font-bold"
+                      >
+                        -
+                      </button>
 
-                    const platformFee = 10;
-                    const delivery = 40;
+                      <div className="w-10 text-center font-black text-sm">
+                        {quantity}
+                      </div>
 
-                    const total =
-                      price +
-                      gst +
-                      platformFee +
-                      delivery;
-
-                    return (
-                      <>
-                        {/* PRICE */}
-                        <div className="mt-4 border">
-                          <div className="px-3 py-2 bg-gray-50 border-b font-bold text-sm">
-                            Price
-                            Details
-                          </div>
-
-                          <div className="p-3 text-sm space-y-2">
-                            <Row
-                              label="Price"
-                              value={`₹${price}`}
-                            />
-
-                            <Row
-                              label="GST"
-                              value={`₹${gst}`}
-                            />
-
-                            <Row
-                              label="Platform Fee"
-                              value={`₹${platformFee}`}
-                            />
-
-                            <Row
-                              label="Delivery"
-                              value={`₹${delivery}`}
-                            />
-
-                            <div className="border-t pt-2">
-                              <Row
-                                label="Total"
-                                value={`₹${total}`}
-                                bold
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* ADDRESS */}
-                        <div className="mt-4">
-                          <p className="font-bold text-sm mb-2">
-                            Delivery
-                            Address
-                          </p>
-
-                          <div className="relative">
-                            <FaMapMarkerAlt className="absolute top-4 left-3 text-orange-500 text-sm" />
-
-                            <select
-                              value={
-                                selectedAddress
-                              }
-                              onChange={(
-                                e
-                              ) =>
-                                setSelectedAddress(
-                                  e
-                                    .target
-                                    .value
-                                )
-                              }
-                              className="w-full border border-gray-300 py-3 pl-10 pr-3 text-sm outline-none focus:border-orange-500"
-                            >
-                              {addresses.length ===
-                                0 && (
-                                <option value="">
-                                  No
-                                  Address
-                                  Found
-                                </option>
-                              )}
-
-                              {addresses.map(
-                                (
-                                  item
-                                ) => (
-                                  <option
-                                    key={
-                                      item._id
-                                    }
-                                    value={
-                                      item._id
-                                    }
-                                  >
-                                    {
-                                      item.fullName
-                                    }{" "}
-                                    -{" "}
-                                    {
-                                      item.city
-                                    }
-                                    ,{" "}
-                                    {
-                                      item.state
-                                    }
-                                  </option>
-                                )
-                              )}
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* PAYMENT */}
-                        <div className="mt-4">
-                          <p className="font-bold text-sm mb-2">
-                            Payment
-                            Method
-                          </p>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              onClick={() =>
-                                setPaymentMethod(
-                                  "cod"
-                                )
-                              }
-                              className={`border py-3 text-sm font-semibold flex justify-center items-center gap-2 ${
-                                paymentMethod ===
-                                "cod"
-                                  ? "border-orange-500 bg-orange-50 text-orange-600"
-                                  : ""
-                              }`}
-                            >
-                              <FaMoneyBillWave />
-                              COD
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                setPaymentMethod(
-                                  "online"
-                                )
-                              }
-                              className={`border py-3 text-sm font-semibold flex justify-center items-center gap-2 ${
-                                paymentMethod ===
-                                "online"
-                                  ? "border-orange-500 bg-orange-50 text-orange-600"
-                                  : ""
-                              }`}
-                            >
-                              <FaCreditCard />
-                              Online
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* BUTTON */}
-                        <button
-                          onClick={
-                            handlePlaceOrder
-                          }
-                          disabled={
-                            placingOrder
-                          }
-                          className="w-full mt-5 bg-gradient-to-r from-orange-500 to-amber-500 text-white py-3 font-black"
-                        >
-                          {placingOrder
-                            ? "Processing..."
-                            : "Confirm Order"}
-                        </button>
-                      </>
-                    );
-                  })()}
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((prev) => prev + 1)}
+                        className="w-8 h-8 bg-orange-50 hover:bg-orange-100 font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </motion.div>
+
+                {(() => {
+                  const price = Number(selectedProduct.price);
+
+                  const subtotal = price * quantity;
+
+                  const gst = Math.round(subtotal * 0.05);
+
+                  const platformFee = 10;
+
+                  const delivery = quantity >= 5 ? 0 : 40;
+
+                  const total = subtotal + gst + platformFee + delivery;
+
+                  return (
+                    <>
+                      {/* PRICE DETAILS */}
+
+                      <div className="mt-3 border-2 border-orange-200">
+                        <div className="px-3 py-2 bg-orange-50 border-b-2 border-orange-200 font-bold text-xs text-orange-700">
+                          Price Details
+                        </div>
+
+                        <div className="p-2 text-xs space-y-1">
+                          <Row
+                            label={`Price (${quantity} × ₹${price})`}
+                            value={`₹${subtotal}`}
+                          />
+
+                          <Row label="GST" value={`₹${gst}`} />
+
+                          <Row label="Platform Fee" value={`₹${platformFee}`} />
+
+                          <Row label="Delivery" value={`₹${delivery}`} />
+
+                          {quantity >= 5 && (
+                            <div className="text-green-600 font-bold">
+                              Free Delivery Applied
+                            </div>
+                          )}
+
+                          <div className="border-t border-orange-200 pt-2">
+                            <Row label="Total" value={`₹${total}`} bold />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ADDRESS */}
+
+                      <div className="mt-3">
+                        <p className="font-bold text-xs mb-2">
+                          Delivery Address
+                        </p>
+
+                        <div className="relative">
+                          <FaMapMarkerAlt className="absolute top-3 left-3 text-orange-500 text-xs" />
+
+                          <select
+                            value={selectedAddress}
+                            onChange={(e) => setSelectedAddress(e.target.value)}
+                            className="w-full border-2 border-orange-200 py-2 pl-8 pr-2 text-xs outline-none focus:border-orange-500"
+                          >
+                            {addresses.length === 0 && (
+                              <option value="">No Address Found</option>
+                            )}
+
+                            {addresses.map((item) => (
+                              <option key={item._id} value={item._id}>
+                                {item.fullName} -{item.city},{item.state}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* PAYMENT */}
+
+                      <div className="mt-3">
+                        <p className="font-bold text-xs mb-2">Payment Method</p>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => setPaymentMethod("cod")}
+                            className={`border-2 py-2 text-xs font-semibold flex items-center justify-center gap-2 ${
+                              paymentMethod === "cod"
+                                ? "border-orange-500 bg-orange-50 text-orange-600"
+                                : "border-orange-200"
+                            }`}
+                          >
+                            <FaMoneyBillWave />
+                            COD
+                          </button>
+
+                          <button
+                            onClick={() => setPaymentMethod("online")}
+                            className={`border-2 py-2 text-xs font-semibold flex items-center justify-center gap-2 ${
+                              paymentMethod === "online"
+                                ? "border-orange-500 bg-orange-50 text-orange-600"
+                                : "border-orange-200"
+                            }`}
+                          >
+                            <FaCreditCard />
+                            Online
+                          </button>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handlePlaceOrder}
+                        disabled={placingOrder}
+                        className="w-full mt-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white py-2.5 font-bold border-2 border-orange-300"
+                      >
+                        {placingOrder
+                          ? "Processing..."
+                          : `Confirm Order ₹${total}`}
+                      </button>
+                    </>
+                  );
+                })()}
+              </div>
             </motion.div>
-          )}
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
 }
 
-function Row({
-  label,
-  value,
-  bold,
-}) {
+function Row({ label, value, bold }) {
   return (
     <div className="flex justify-between text-sm">
-      <span
-        className={
-          bold
-            ? "font-bold"
-            : "text-gray-600"
-        }
-      >
-        {label}
-      </span>
+      <span className={bold ? "font-bold" : "text-gray-600"}>{label}</span>
 
-      <span
-        className={
-          bold
-            ? "font-black text-orange-500"
-            : "font-semibold"
-        }
-      >
+      <span className={bold ? "font-black text-orange-500" : "font-semibold"}>
         {value}
       </span>
     </div>

@@ -46,7 +46,7 @@ const SellerProfile = () => {
   const handleUpdate = async () => {
     try {
       await axios.put(
-        "http://localhost:5000/api/seller/profile/update",
+        "https://api.apnapashu.com/api/seller/profile/update",
         form,
         { withCredentials: true }
       );
@@ -61,7 +61,7 @@ const SellerProfile = () => {
   const handleBankUpdate = async () => {
     try {
       await axios.put(
-        "http://localhost:5000/api/seller/bank/update",
+        "https://api.apnapashu.com/api/seller/bank/update",
         { bankDetails: bankForm },
         { withCredentials: true }
       );

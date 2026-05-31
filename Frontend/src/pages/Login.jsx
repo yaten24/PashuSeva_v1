@@ -4,9 +4,11 @@ import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useUser } from "../context/userContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setUser } = useUser();
 
   const [form, setForm] = useState({
     emailOrMobile: "",
@@ -19,38 +21,157 @@ export default function Login() {
   const onChange = (key) => (e) =>
     setForm({ ...form, [key]: e.target.value });
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+ const handleLogin = async (e) => {
+  e.preventDefault();
 
-    if (!form.emailOrMobile || !form.password) {
-      return toast.error("Enter email/mobile & password");
+  if (loading) return;
+
+  const emailOrMobile =
+    form.emailOrMobile?.trim();
+
+  const password =
+    form.password?.trim();
+
+  // Validation
+
+  if (!emailOrMobile) {
+    return toast.error(
+      "Email or mobile is required"
+    );
+  }
+
+  if (!password) {
+    return toast.error(
+      "Password is required"
+    );
+  }
+
+  if (password.length < 6) {
+    return toast.error(
+      "Password must be at least 6 characters"
+    );
+  }
+
+  const isEmail =
+    emailOrMobile.includes("@");
+
+  if (isEmail) {
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (
+      !emailRegex.test(
+        emailOrMobile
+      )
+    ) {
+      return toast.error(
+        "Enter a valid email"
+      );
     }
+  } else {
+    const mobileRegex =
+      /^[0-9]{10}$/;
 
-    try {
-      setLoading(true);
+    if (
+      !mobileRegex.test(
+        emailOrMobile
+      )
+    ) {
+      return toast.error(
+        "Enter a valid mobile number"
+      );
+    }
+  }
 
-      const isEmail = form.emailOrMobile.includes("@");
+  try {
+    setLoading(true);
 
-      const payload = isEmail
-        ? { email: form.emailOrMobile, password: form.password }
-        : { mobile: form.emailOrMobile, password: form.password };
+    const payload =
+      isEmail
+        ? {
+            email:
+              emailOrMobile,
+            password,
+          }
+        : {
+            mobile:
+              emailOrMobile,
+            password,
+          };
 
-      const { data } = await axios.post(
+    const { data } =
+      await axios.post(
         "https://api.apnapashu.com/api/user/login",
         payload,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
 
-      toast.success("Login successful 🚀");
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      setTimeout(() => navigate("/"), 1000);
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Login failed ❌");
-    } finally {
-      setLoading(false);
+    if (!data?.success) {
+      return toast.error(
+        data?.message ||
+          "Login failed"
+      );
     }
-  };
+
+    // User Context Update
+    setUser(data.user);
+
+    // Local Storage
+    localStorage.setItem(
+      "user",
+      JSON.stringify(
+        data.user
+      )
+    );
+
+    toast.success(
+      data?.message ||
+        "Login successful 🚀"
+    );
+
+    navigate("/");
+
+  } catch (err) {
+    console.error(
+      "LOGIN ERROR:",
+      err
+    );
+
+    if (
+      err?.response?.status ===
+      401
+    ) {
+      toast.error(
+        "Invalid credentials"
+      );
+    } else if (
+      err?.response?.status ===
+      404
+    ) {
+      toast.error(
+        "User not found"
+      );
+    } else if (
+      err?.response?.status >=
+      500
+    ) {
+      toast.error(
+        "Server error. Please try again later."
+      );
+    } else {
+      toast.error(
+        err?.response?.data
+          ?.message ||
+          err?.message ||
+          "Login failed ❌"
+      );
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen w-full flex overflow-hidden bg-gradient-to-b from-gray-50 to-yellow-50">
@@ -156,13 +277,13 @@ export default function Login() {
                 Create account
               </Link>
 
-              <button
+              {/* <button
                 type="button"
                 onClick={() => navigate("/forgot-password")}
                 className="text-gray-500 hover:text-black"
               >
                 Forgot password?
-              </button>
+              </button> */}
             </div>
           </form>
         </motion.div>

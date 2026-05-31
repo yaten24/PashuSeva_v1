@@ -3,6 +3,7 @@ import { getSellerProfile, loginSellerController, logoutSeller, registerSellerCo
 import upload from "../Middlewares/uploadMiddleware.js";
 import { createProduct } from "../Controllers/products.controllers.js";
 import { protectSeller } from "../Middlewares/sellerAuth.middleware.js";
+import { getSellerOrders, updateOrderStatus } from "../Controllers/order.controllers.js";
 
 const router = express.Router();
 
@@ -19,5 +20,18 @@ router.post(
 router.post("/logout",protectSeller, logoutSeller);
 
 router.get("/auth/me",protectSeller, getSellerProfile)
+
+
+router.get(
+  "/seller-orders",
+  protectSeller,
+  getSellerOrders
+);
+
+router.put(
+  "/update-order-status/:orderId",
+  protectSeller,
+  updateOrderStatus
+);
 
 export default router;

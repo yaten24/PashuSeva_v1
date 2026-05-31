@@ -1,6 +1,7 @@
 import express from "express";
 import protect from "../Middlewares/userAuth.middleware.js";
-import { buyProductController, getSingleOrderController, getUserOrdersController } from "../Controllers/order.controllers.js";
+import { buyProductController, getSellerOrders, getSingleOrderController, getUserOrdersController } from "../Controllers/order.controllers.js";
+import { protectSeller } from "../Middlewares/sellerAuth.middleware.js";
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ ORDER ROUTES
 ========================================
 */
 
-// BUY PRODUCT / PLACE ORDER
+// BUY PRODUCT / PLACE ORDER/seller-orders
 router.post(
   "/buy-product",
   protect,
@@ -27,6 +28,12 @@ router.get(
   "/:orderId",
   protect,
   getSingleOrderController
+);
+
+router.get(
+  "/seller-order",
+  protectSeller,
+  getSellerOrders
 );
 
 export default router;

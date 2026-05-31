@@ -4,7 +4,6 @@ import Seller from "../Models/seller.model.js";
 export const protectSeller = async (req, res, next) => {
   try {
     let token;
-
     // 🔥 Token from cookies
     if (req.cookies && req.cookies.sellerToken) {
       token = req.cookies.sellerToken;
@@ -33,7 +32,6 @@ export const protectSeller = async (req, res, next) => {
     req.user = seller;
 
     next();
-
   } catch (error) {
     console.error(error);
     return res.status(401).json({

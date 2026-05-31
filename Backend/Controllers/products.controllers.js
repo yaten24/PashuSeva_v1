@@ -111,3 +111,227 @@ export const getSingleProduct = async (req, res) => {
     });
   }
 };
+
+export const getSellerProducts = async (
+  req,
+  res
+) => {
+  try {
+    const sellerId = req.user._id;
+
+    const products =
+      await Product.find({
+        seller: sellerId,
+      })
+        .sort({
+          createdAt: -1,
+        })
+        .populate(
+          "category",
+          "name"
+        );
+
+    return res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    console.log(
+      "GET SELLER PRODUCTS ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to fetch products",
+      error: error.message,
+    });
+  }
+};
+
+export const deleteProduct = async (
+  req,
+  res
+) => {
+  try {
+    const { productId } =
+      req.params;
+
+    const sellerId =
+      req.user._id;
+
+    const product =
+      await Product.findOne({
+        _id: productId,
+        seller: sellerId,
+      });
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "Product not found",
+      });
+    }
+
+    await Product.findByIdAndDelete(
+      productId
+    );
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Product deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message:
+        "Delete failed",
+    });
+  }
+};
+
+export const updateProductStock =
+  async (req, res) => {
+    try {
+      const { productId } =
+        req.params;
+
+      const { stock } =
+        req.body;
+
+      const sellerId =
+        req.user._id;
+
+      const product =
+        await Product.findOne({
+          _id: productId,
+          seller: sellerId,
+        });
+
+      if (!product) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message:
+              "Product not found",
+          });
+      }
+
+      product.stock =
+        Number(stock);
+
+      await product.save();
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Stock updated successfully",
+        product,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message:
+          "Update failed",
+      });
+    }
+  };
+
+export const getHomeProducts = async (
+  req,
+  res
+) => {
+  try {
+    const products =
+      await Product.find({
+        isActive: true,
+      })
+        .populate(
+          "seller",
+          "name"
+        )
+        .sort({
+          createdAt: -1,
+        })
+        .limit(4);
+
+    return res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    console.log(
+      "HOME PRODUCTS ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to fetch products",
+      error: error.message,
+    });
+  }
+};
+
+export const searchProducts =
+  async (req, res) => {
+    try {
+      const {
+        q,
+        category,
+      } = req.query;
+
+      const filter = {
+        isActive: true,
+      };
+
+      if (q) {
+        filter.name = {
+          $regex: q,
+          $options: "i",
+        };
+      }
+
+      if (
+        category &&
+        category !== "all"
+      ) {
+        filter.category =
+          category;
+      }
+
+      const products =
+        await Product.find(
+          filter
+        )
+          .populate(
+            "seller",
+            "name"
+          )
+          .sort({
+            createdAt: -1,
+          });
+
+      return res.status(200).json({
+        success: true,
+        count:
+          products.length,
+        products,
+      });
+    } catch (error) {
+      console.log(error);
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Search failed",
+      });
+    }
+  };

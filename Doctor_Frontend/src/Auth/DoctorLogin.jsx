@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
-import { FaUserMd, FaCalendarCheck, FaRupeeSign } from "react-icons/fa";
-import toast from "react-hot-toast";
+import { Eye, EyeOff, Mail, Lock, Stethoscope } from "lucide-react";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import { useDoctorAuth } from "../Context/DoctorAuthContext";
 
 const DoctorLogin = () => {
@@ -18,34 +17,55 @@ const DoctorLogin = () => {
     password: "",
   });
 
+  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
+  // ================= HANDLE SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setLoading(true);
-
-    const res = await loginDoctor(formData);
-
-    if (res.success) {
-      toast.success("Doctor Login Successful 🩺");
-      navigate("/doctor/dashboard");
-    } else {
-      toast.error(res.message);
+    if (!formData.email || !formData.password) {
+      return toast.error("Please fill all fields");
     }
 
-    setLoading(false);
+    try {
+      setLoading(true);
+
+      const res = await loginDoctor(formData);
+
+      console.log(res);
+
+      if (res?.success) {
+        toast.success("Login Successful");
+
+        navigate("/doctor/dashboard");
+      } else {
+        toast.error(res?.message || "Login failed");
+      }
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Something went wrong"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // 🔥 Animation configs
+  // ================= ANIMATION =================
   const container = {
     hidden: {},
-    show: {
+    visible: {
       transition: {
         staggerChildren: 0.1,
       },
@@ -53,148 +73,138 @@ const DoctorLogin = () => {
   };
 
   const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
+    hidden: {
+      opacity: 0,
+      y: 15,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+    },
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-100">
-
-      {/* 🔥 LEFT SIDE */}
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+      {/* LOGIN BOX */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="hidden md:flex md:w-1/2 relative text-white items-center justify-center px-10"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1588776814546-1ffcf47267a5')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+        variants={container}
+        initial="hidden"
+        animate="visible"
+        className="w-full max-w-md bg-white border border-gray-200 shadow-md p-6 sm:p-8"
       >
-        <div className="absolute inset-0 bg-black/70"></div>
-
+        {/* HEADER */}
         <motion.div
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="relative z-10 max-w-md"
+          variants={item}
+          className="flex flex-col items-center mb-8"
         >
-          <h1 className="text-4xl font-bold">
-            Welcome Back{" "}
-            <span className="text-green-400">Doctor</span>
-          </h1>
-
-          <p className="mt-4 text-gray-200">
-            Login to manage your patients and grow your practice.
-          </p>
-
-          <div className="mt-6 space-y-4 text-sm">
-            <div className="flex items-center gap-3">
-              <FaUserMd className="text-green-400" />
-              <span>Manage Your Profile</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <FaCalendarCheck className="text-green-400" />
-              <span>Track Appointments</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <FaRupeeSign className="text-green-400" />
-              <span>Monitor Earnings</span>
-            </div>
+          <div className="w-14 h-14 bg-green-100 flex items-center justify-center mb-4">
+            <Stethoscope className="text-green-600" size={28} />
           </div>
-        </motion.div>
-      </motion.div>
 
-      {/* 🔥 RIGHT SIDE */}
-      <div className="w-full md:w-1/2 flex items-center justify-center px-6 py-10">
-
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="w-full max-w-md bg-white p-6 shadow-lg border border-gray-300 rounded-lg"
-        >
-          <motion.h2
-            variants={item}
-            className="text-2xl font-bold mb-6 text-gray-800 text-center"
-          >
+          <h2 className="text-2xl font-bold text-gray-800">
             Doctor Login
-          </motion.h2>
+          </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <p className="text-sm text-gray-500 mt-1">
+            Access your dashboard
+          </p>
+        </motion.div>
 
-            {/* EMAIL */}
-            <motion.div
-              variants={item}
-              className="flex items-center border border-gray-300 px-3 py-2 rounded-md focus-within:border-green-600 focus-within:ring-1 focus-within:ring-green-200"
-            >
-              <Mail size={18} className="mr-2 text-gray-500" />
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* EMAIL */}
+          <motion.div variants={item}>
+            <label className="text-sm font-medium text-gray-700 block mb-2">
+              Email
+            </label>
+
+            <div className="flex items-center border border-gray-300 px-4 py-3 focus-within:border-green-600 transition">
+              <Mail size={18} className="text-gray-400 mr-3" />
+
               <input
                 type="email"
                 name="email"
-                placeholder="Email"
-                className="w-full outline-none text-sm"
+                placeholder="Enter email"
                 value={formData.email}
                 onChange={handleChange}
+                className="w-full outline-none text-sm bg-transparent"
                 required
               />
-            </motion.div>
+            </div>
+          </motion.div>
 
-            {/* PASSWORD */}
-            <motion.div
-              variants={item}
-              className="flex items-center border border-gray-300 px-3 py-2 rounded-md focus-within:border-green-600 focus-within:ring-1 focus-within:ring-green-200"
-            >
-              <Lock size={18} className="mr-2 text-gray-500" />
+          {/* PASSWORD */}
+          <motion.div variants={item}>
+            <label className="text-sm font-medium text-gray-700 block mb-2">
+              Password
+            </label>
+
+            <div className="flex items-center border border-gray-300 px-4 py-3 focus-within:border-green-600 transition">
+              <Lock size={18} className="text-gray-400 mr-3" />
+
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Password"
-                className="w-full outline-none text-sm"
+                placeholder="Enter password"
                 value={formData.password}
                 onChange={handleChange}
+                className="w-full outline-none text-sm bg-transparent"
                 required
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </motion.div>
 
-            {/* 🔥 FORGOT PASSWORD */}
-            <motion.div variants={item} className="text-right">
-              <Link
-                to="/doctor/forgot-password"
-                className="text-sm text-green-600 hover:underline"
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-gray-500"
               >
-                Forgot Password?
-              </Link>
-            </motion.div>
+                {showPassword ? (
+                  <EyeOff size={18} />
+                ) : (
+                  <Eye size={18} />
+                )}
+              </button>
+            </div>
+          </motion.div>
 
-            {/* BUTTON */}
-            <motion.button
-              variants={item}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.95 }}
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-semibold transition disabled:opacity-50"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </motion.button>
-          </form>
-
-          {/* FOOTER */}
-          <motion.p
+          {/* FORGOT PASSWORD */}
+          <motion.div
             variants={item}
-            className="text-sm text-center mt-4 text-gray-600"
+            className="flex justify-end"
           >
-            Don’t have an account?{" "}
-            <Link to="/doctor/register" className="text-green-600 font-semibold">
-              Register
+            <Link
+              to="/doctor/forgot-password"
+              className="text-sm text-green-600 hover:underline"
+            >
+              Forgot Password?
             </Link>
-          </motion.p>
-        </motion.div>
-      </div>
+          </motion.div>
+
+          {/* BUTTON */}
+          <motion.button
+            variants={item}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 font-semibold transition disabled:opacity-60"
+          >
+            {loading ? "Logging In..." : "Login"}
+          </motion.button>
+        </form>
+
+        {/* FOOTER */}
+        <motion.p
+          variants={item}
+          className="text-center text-sm text-gray-600 mt-6"
+        >
+          Don’t have an account?{" "}
+          <Link
+            to="/doctor/register"
+            className="text-green-600 font-semibold hover:underline"
+          >
+            Register
+          </Link>
+        </motion.p>
+      </motion.div>
     </div>
   );
 };

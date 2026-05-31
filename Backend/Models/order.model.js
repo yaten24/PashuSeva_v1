@@ -28,7 +28,11 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
-    // 🔹 Pricing
+    quantity: {
+      type: Number,
+      required: true,
+    },
+
     totalAmount: {
       type: Number,
       required: true,

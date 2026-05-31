@@ -50,6 +50,7 @@ import AddAddress from "./pages/User/AddAddress";
 import Profile from "./pages/Dashboard";
 import MyOrders from "./pages/User/MyOrders";
 import OrderDetails from "./pages/User/OrderDetails";
+import Favorites from "./pages/User/Favorite";
 
 export default function App() {
   return (
@@ -69,11 +70,9 @@ export default function App() {
           <Route path="/add-address" element={<AddAddress />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/orders" element={<MyOrders />} />
+          <Route path="/favorites" element={<Favorites />} />
 
-          <Route
-            path="/order/:orderId"
-            element={<OrderDetails />}
-          />
+          <Route path="/order/:orderId" element={<OrderDetails />} />
 
           <Route path="product/:id" element={<ProductDetails />} />
 

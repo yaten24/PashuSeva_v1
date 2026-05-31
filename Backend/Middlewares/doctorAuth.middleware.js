@@ -38,6 +38,11 @@ export const protectDoctor = async (req, res, next) => {
     // 🔥 ATTACH TO REQUEST
     req.doctor = doctor;
 
+    // req.doctor = {
+    //   _id: doctor._id,
+    //   role: doctor.role,
+    // };
+
     next();
   } catch (error) {
     console.error("Auth Error:", error);

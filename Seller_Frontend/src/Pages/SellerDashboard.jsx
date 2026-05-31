@@ -7,163 +7,308 @@ import {
   FaShoppingCart,
   FaWallet,
   FaPlus,
-  FaEdit,
-  FaSignOutAlt, // 🔥 logout icon
+  FaSignOutAlt,
 } from "react-icons/fa";
 
 const SellerDashboard = () => {
-  const { seller, loading, logoutSeller } = useSeller(); // 🔥 logout function
+  const {
+    seller,
+    loading,
+    logoutSeller,
+  } = useSeller();
+
   const navigate = useNavigate();
 
-  // 🔥 logout handler
   const handleLogout = async () => {
     await logoutSeller();
     navigate("/seller/login");
   };
 
-  if (loading)
-    return <p className="text-white p-4">Loading...</p>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+        <div className="text-orange-600 font-semibold">
+          Loading Dashboard...
+        </div>
+      </div>
+    );
+  }
 
-  if (!seller)
-    return <p className="text-white p-4">No Seller Found</p>;
+  if (!seller) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+        <div className="text-red-500 font-semibold">
+          No Seller Found
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-4 py-4 md:px-6">
+    <div className="min-h-screen bg-orange-50 py-5 px-3">
 
-      {/* 🔥 HEADER + LOGOUT */}
-      <div className="mb-6 md:mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-xl md:text-3xl font-bold">
-            Welcome, {seller.name}
-          </h1>
-          <p className="text-gray-400 text-sm md:text-base">
-            {seller.businessName}
-          </p>
-        </div>
+      <div className="max-w-5xl mx-auto">
 
-        {/* 🔥 Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-3 py-2 text-xs md:text-sm"
-        >
-          <FaSignOutAlt />
-          Logout
-        </button>
-      </div>
+        {/* HEADER */}
 
-      {/* 🔥 INFO CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-8">
+        <div className="mb-5 bg-white border-2 border-orange-200 p-4 shadow-sm flex justify-between items-center">
 
-        <div className="p-4 md:p-6 bg-white/5 border border-white/10">
-          <div className="flex items-center gap-2 mb-1">
-            <FaWallet className="text-green-400 text-sm md:text-lg" />
-            <h3 className="text-xs md:text-lg">Wallet</h3>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-orange-700">
+              Welcome, {seller.name}
+            </h1>
+
+            <p className="text-sm text-gray-500">
+              {seller.businessName}
+            </p>
           </div>
-          <p className="text-lg md:text-2xl font-bold">
-            ₹{seller.walletBalance}
-          </p>
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2"
+          >
+            <FaSignOutAlt />
+            Logout
+          </button>
+
         </div>
 
-        <div className="p-4 md:p-6 bg-white/5 border border-white/10">
-          <div className="flex items-center gap-2 mb-1">
-            <FaShoppingCart className="text-blue-400 text-sm md:text-lg" />
-            <h3 className="text-xs md:text-lg">Orders</h3>
+        {/* STATS */}
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
+
+          <div className="bg-white border-2 border-orange-200 p-4 shadow-sm">
+
+            <div className="flex items-center gap-2 mb-2">
+              <FaWallet className="text-green-600" />
+              <h3 className="text-sm font-semibold text-gray-700">
+                Wallet Balance
+              </h3>
+            </div>
+
+            <p className="text-2xl font-bold text-gray-800">
+              ₹{seller.walletBalance || 0}
+            </p>
+
           </div>
-          <p className="text-lg md:text-2xl font-bold">0</p>
-        </div>
 
-        <div className="p-4 md:p-6 bg-white/5 border border-white/10 col-span-2 md:col-span-1">
-          <div className="flex items-center gap-2 mb-1">
-            <FaUser className="text-yellow-400 text-sm md:text-lg" />
-            <h3 className="text-xs md:text-lg">Rating</h3>
+          <div className="bg-white border-2 border-orange-200 p-4 shadow-sm">
+
+            <div className="flex items-center gap-2 mb-2">
+              <FaShoppingCart className="text-blue-600" />
+              <h3 className="text-sm font-semibold text-gray-700">
+                Orders
+              </h3>
+            </div>
+
+            <p className="text-2xl font-bold text-gray-800">
+              0
+            </p>
+
           </div>
-          <p className="text-lg md:text-2xl font-bold">
-            {seller.rating} ⭐
-          </p>
-        </div>
-      </div>
 
-      {/* 🔥 QUICK ACTIONS */}
-      <div className="mb-8">
-        <h2 className="text-base md:text-xl font-semibold mb-3">
-          Quick Actions
-        </h2>
+          <div className="bg-white border-2 border-orange-200 p-4 shadow-sm col-span-2 md:col-span-1">
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div className="flex items-center gap-2 mb-2">
+              <FaUser className="text-yellow-600" />
+              <h3 className="text-sm font-semibold text-gray-700">
+                Rating
+              </h3>
+            </div>
 
-          <button
-            onClick={() => navigate("/seller/add-product")}
-            className="p-3 md:p-5 bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 text-sm md:text-base"
-          >
-            <FaPlus />
-            Add
-          </button>
+            <p className="text-2xl font-bold text-gray-800">
+              {seller.rating || 0} ⭐
+            </p>
 
-          <button
-            onClick={() => navigate("/seller/products")}
-            className="p-3 md:p-5 bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2 text-sm md:text-base"
-          >
-            <FaBoxOpen />
-            Products
-          </button>
-
-          <button
-            onClick={() => navigate("/seller/orders")}
-            className="p-3 md:p-5 bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-2 text-sm md:text-base"
-          >
-            <FaShoppingCart />
-            Orders
-          </button>
-
-          <button
-            onClick={() => navigate("/seller/profile")}
-            className="p-3 md:p-5 bg-gray-700 hover:bg-gray-800 flex items-center justify-center gap-2 text-sm md:text-base"
-          >
-            <FaEdit />
-            Profile
-          </button>
+          </div>
 
         </div>
-      </div>
 
-      {/* 🔥 SELLER DETAILS */}
-      <div className="bg-white/5 border border-white/10 p-4 md:p-6">
-        <h2 className="text-base md:text-xl font-semibold mb-4">
-          Seller Information
-        </h2>
+        {/* QUICK ACTIONS */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm md:text-base text-gray-300">
+        <div className="mb-5">
 
-          <p><strong>Name:</strong> {seller.name}</p>
-          <p><strong>Email:</strong> {seller.email}</p>
-          <p><strong>Mobile:</strong> {seller.mobile}</p>
+          <h2 className="text-lg font-bold text-orange-700 mb-3">
+            Quick Actions
+          </h2>
 
-          <p>
-            <strong>Location:</strong>{" "}
-            {seller.location?.city}, {seller.location?.state}
-          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
 
-          <p>
-            <strong>Status:</strong>{" "}
-            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs">
-              {seller.adminApproval}
-            </span>
-          </p>
+            <button
+              onClick={() =>
+                navigate("/seller/add-product")
+              }
+              className="bg-green-500 hover:bg-green-600 text-white p-4 flex items-center justify-center gap-2 font-medium"
+            >
+              <FaPlus />
+              Add Product
+            </button>
 
-          <p>
-            <strong>Verified:</strong>{" "}
+            <button
+              onClick={() =>
+                navigate("/seller/products")
+              }
+              className="bg-blue-500 hover:bg-blue-600 text-white p-4 flex items-center justify-center gap-2 font-medium"
+            >
+              <FaBoxOpen />
+              Products
+            </button>
+
+            <button
+              onClick={() =>
+                navigate("/seller/orders")
+              }
+              className="bg-purple-500 hover:bg-purple-600 text-white p-4 flex items-center justify-center gap-2 font-medium"
+            >
+              <FaShoppingCart />
+              Orders
+            </button>
+
+            <button
+              onClick={() =>
+                navigate("/seller/withdraw")
+              }
+              className="bg-orange-500 hover:bg-orange-600 text-white p-4 flex items-center justify-center gap-2 font-medium"
+            >
+              <FaWallet />
+              Withdraw
+            </button>
+
+          </div>
+
+        </div>
+                {/* SELLER INFORMATION */}
+
+        <div className="bg-white border-2 border-orange-200 shadow-sm p-5">
+
+          <div className="flex items-center justify-between mb-4">
+
+            <h2 className="text-lg font-bold text-orange-700">
+              Seller Information
+            </h2>
+
             <span
-              className={`px-2 py-1 text-xs ${
+              className={`px-3 py-1 text-xs font-semibold ${
                 seller.isVerified
-                  ? "bg-green-500/20 text-green-400"
-                  : "bg-red-500/20 text-red-400"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
               }`}
             >
-              {seller.isVerified ? "Verified" : "Not Verified"}
+              {seller.isVerified
+                ? "Verified Seller"
+                : "Not Verified"}
             </span>
-          </p>
+
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+
+            <div className="border border-orange-100 p-3 bg-orange-50">
+
+              <p className="text-gray-500 text-xs mb-1">
+                Seller Name
+              </p>
+
+              <p className="font-semibold text-gray-800">
+                {seller.name}
+              </p>
+
+            </div>
+
+            <div className="border border-orange-100 p-3 bg-orange-50">
+
+              <p className="text-gray-500 text-xs mb-1">
+                Business Name
+              </p>
+
+              <p className="font-semibold text-gray-800">
+                {seller.businessName ||
+                  "Not Available"}
+              </p>
+
+            </div>
+
+            <div className="border border-orange-100 p-3 bg-orange-50">
+
+              <p className="text-gray-500 text-xs mb-1">
+                Email Address
+              </p>
+
+              <p className="font-semibold text-gray-800 break-all">
+                {seller.email}
+              </p>
+
+            </div>
+
+            <div className="border border-orange-100 p-3 bg-orange-50">
+
+              <p className="text-gray-500 text-xs mb-1">
+                Mobile Number
+              </p>
+
+              <p className="font-semibold text-gray-800">
+                {seller.mobile}
+              </p>
+
+            </div>
+
+            <div className="border border-orange-100 p-3 bg-orange-50">
+
+              <p className="text-gray-500 text-xs mb-1">
+                City
+              </p>
+
+              <p className="font-semibold text-gray-800">
+                {seller.location?.city ||
+                  "Not Available"}
+              </p>
+
+            </div>
+
+            <div className="border border-orange-100 p-3 bg-orange-50">
+
+              <p className="text-gray-500 text-xs mb-1">
+                State
+              </p>
+
+              <p className="font-semibold text-gray-800">
+                {seller.location?.state ||
+                  "Not Available"}
+              </p>
+
+            </div>
+
+            <div className="border border-orange-100 p-3 bg-orange-50">
+
+              <p className="text-gray-500 text-xs mb-1">
+                Approval Status
+              </p>
+
+              <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold">
+                {seller.adminApproval ||
+                  "Pending"}
+              </span>
+
+            </div>
+
+            <div className="border border-orange-100 p-3 bg-orange-50">
+
+              <p className="text-gray-500 text-xs mb-1">
+                Wallet Balance
+              </p>
+
+              <p className="font-bold text-green-600">
+                ₹
+                {seller.walletBalance ||
+                  0}
+              </p>
+
+            </div>
+
+          </div>
 
         </div>
+
       </div>
 
     </div>

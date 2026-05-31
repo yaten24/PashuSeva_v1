@@ -61,6 +61,7 @@ export const DoctorAuthProvider = ({ children }) => {
         formData,
         { withCredentials: true }
       );
+      console.log(res)
 
       if (res.data.success) {
         setDoctor(res.data.doctor);

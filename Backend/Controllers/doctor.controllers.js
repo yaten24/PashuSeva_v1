@@ -270,3 +270,38 @@ export const getDoctorsList = async (req, res) => {
     });
   }
 };
+
+export const getHomeDoctors =
+  async (req, res) => {
+    try {
+      const doctors =
+        await Doctor.find({
+          isVerified: false,
+        })
+          .sort({
+            createdAt: -1,
+          })
+          .limit(3)
+          .select(
+            "name profileImage specialization qualification experienceYears phone"
+          );
+
+      return res.status(200).json({
+        success: true,
+        count: doctors.length,
+        doctors,
+      });
+    } catch (error) {
+      console.log(
+        "HOME DOCTORS ERROR:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to fetch doctors",
+        error: error.message,
+      });
+    }
+  };

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaUser,
@@ -13,19 +12,18 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
-
-{
-  /* 🔥 LEFT BRANDING */
-}
-import { FaUsers, FaTools, FaShieldAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useSeller } from "../Context/authContext";
 
 const SellerRegister = () => {
   const navigate = useNavigate();
+  const { registerSeller } = useSeller();
 
   const [showPassword, setShowPassword] = useState(false);
-  const { registerSeller } = useSeller();
+  const [loading, setLoading] = useState(false);
+
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -38,10 +36,7 @@ const SellerRegister = () => {
     state: "",
   });
 
-  const [states, setStates] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [loading, setLoading] = useState(false);
-
+  // ================= FETCH STATES =================
   useEffect(() => {
     const fetchStates = async () => {
       try {
@@ -49,251 +44,283 @@ const SellerRegister = () => {
           "https://countriesnow.space/api/v0.1/countries/states",
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ country: "India" }),
-          },
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              country: "India",
+            }),
+          }
         );
+
         const data = await res.json();
-        setStates(data.data.states);
-      } catch (err) {
-        console.log(err);
+
+        setStates(data?.data?.states || []);
+      } catch (error) {
+        console.log(error);
       }
     };
+
     fetchStates();
   }, []);
 
+  // ================= FETCH CITIES =================
   const fetchCities = async (state) => {
     try {
       const res = await fetch(
         "https://countriesnow.space/api/v0.1/countries/state/cities",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ country: "India", state }),
-        },
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            country: "India",
+            state,
+          }),
+        }
       );
+
       const data = await res.json();
-      setCities(data.data);
-    } catch (err) {
-      console.log(err);
+
+      setCities(data?.data || []);
+    } catch (error) {
+      console.log(error);
     }
   };
 
+  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
     if (name === "state") {
       fetchCities(value);
-      setFormData((prev) => ({ ...prev, city: "" }));
+
+      setFormData((prev) => ({
+        ...prev,
+        state: value,
+        city: "",
+      }));
     }
   };
 
+  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
-    const res = await registerSeller(formData);
+    try {
+      setLoading(true);
 
-    if (res.success) {
-      toast.success("Registered Successfully 🚀");
-      navigate("/seller/dashboard"); // 🔥 better UX
-    } else {
-      toast.error(res.message);
+      const res = await registerSeller(formData);
+
+      if (res?.success) {
+        toast.success("Registered Successfully");
+
+        navigate("/seller/dashboard");
+      } else {
+        toast.error(res?.message || "Registration Failed");
+      }
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Something went wrong"
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      <div
-        className="hidden md:flex w-1/2 relative items-center justify-center text-white px-12"
-        style={{
-          backgroundImage: "url('/images/seller_home.jpg')", // ✅ FIXED PATH
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-3 py-6">
+      {/* REGISTER BOX */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-2xl bg-white border border-gray-200 shadow-sm p-5"
       >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-green-900/80 to-black/80"></div>
-
-        <div className="relative z-10 max-w-md">
-          {/* Heading */}
-          <h1 className="text-4xl font-bold mb-4 leading-tight">
-            Grow with <span className="text-green-400">PashuSeva</span>
-          </h1>
-
-          {/* Description */}
-          <p className="text-gray-300 text-base leading-relaxed">
-            Join India’s fast-growing livestock platform designed to empower
-            sellers, veterinarians, and service providers. Expand your reach,
-            manage your services efficiently, and build a trusted digital
-            presence.
-          </p>
-
-          {/* Features */}
-          <div className="mt-8 space-y-4">
-            <div className="flex items-start gap-3">
-              <FaUsers className="text-green-400 mt-1" />
-              <div>
-                <p className="font-semibold">Reach More Customers</p>
-                <p className="text-sm text-gray-400">
-                  Connect with farmers across multiple cities and grow your
-                  network.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <FaTools className="text-green-400 mt-1" />
-              <div>
-                <p className="font-semibold">Easy Service Management</p>
-                <p className="text-sm text-gray-400">
-                  Manage bookings, services, and operations from one dashboard.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <FaShieldAlt className="text-green-400 mt-1" />
-              <div>
-                <p className="font-semibold">Secure & Trusted Platform</p>
-                <p className="text-sm text-gray-400">
-                  Verified system ensuring safety and reliability for sellers.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 🔥 FORM */}
-      <div className="flex w-full md:w-1/2 items-center justify-center bg-gray-50 px-4 py-10">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md bg-white border border-gray-200 shadow-xl p-8"
-        >
-          <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+        {/* HEADER */}
+        <div className="text-center mb-5">
+          <h2 className="text-2xl font-bold text-gray-800">
             Seller Register
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* INPUTS */}
-            {[
-              { name: "name", icon: <FaUser />, placeholder: "Full Name" },
-              { name: "email", icon: <FaEnvelope />, placeholder: "Email" },
-              {
-                name: "mobile",
-                icon: <FaPhone />,
-                placeholder: "Mobile Number",
-              },
-              {
-                name: "businessName",
-                icon: <FaBuilding />,
-                placeholder: "Business Name",
-              },
-              {
-                name: "aadharNumber",
-                icon: <FaIdCard />,
-                placeholder: "Aadhar Number",
-              },
-            ].map((field, i) => (
-              <div
-                key={i}
-                className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600 focus-within:ring-1 focus-within:ring-green-600"
-              >
-                <span className="mr-2 text-gray-500">{field.icon}</span>
-                <input
-                  type="text"
-                  name={field.name}
-                  placeholder={field.placeholder}
-                  className="w-full outline-none text-sm"
-                  value={formData[field.name]}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            ))}
-
-            {/* STATE */}
-            <div className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600">
-              <FaMapMarkerAlt className="mr-2 text-gray-500" />
-              <select
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-                className="w-full outline-none text-sm"
-                required
-              >
-                <option value="">Select State</option>
-                {states.map((s, i) => (
-                  <option key={i} value={s.name}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* CITY */}
-            <div className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600">
-              <FaMapMarkerAlt className="mr-2 text-gray-500" />
-              <select
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                className="w-full outline-none text-sm"
-                required
-              >
-                <option value="">Select City</option>
-                {cities.map((c, i) => (
-                  <option key={i} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* PASSWORD */}
-            <div className="flex items-center border border-gray-300 px-3 py-2 focus-within:border-green-600">
-              <FaLock className="mr-2 text-gray-500" />
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                className="w-full outline-none text-sm"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-
-            {/* BUTTON */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-600 text-white py-2 font-semibold hover:bg-green-700 transition"
-            >
-              {loading ? "Registering..." : "Register"}
-            </button>
-          </form>
-
-          <p className="text-sm text-center mt-4">
-            Already have an account?{" "}
-            <Link to="/seller/login" className="text-green-600 font-semibold">
-              Login
-            </Link>
+          <p className="text-sm text-gray-500 mt-1">
+            Create your seller account
           </p>
-        </motion.div>
-      </div>
+        </div>
+
+        {/* FORM */}
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+        >
+          {/* NAME */}
+          <InputField
+            icon={<FaUser />}
+            name="name"
+            placeholder="Full Name"
+            value={formData.name}
+            onChange={handleChange}
+          />
+
+          {/* MOBILE */}
+          <InputField
+            icon={<FaPhone />}
+            name="mobile"
+            placeholder="Mobile Number"
+            value={formData.mobile}
+            onChange={handleChange}
+          />
+
+          {/* EMAIL */}
+          <InputField
+            icon={<FaEnvelope />}
+            name="email"
+            placeholder="Email Address"
+            value={formData.email}
+            onChange={handleChange}
+          />
+
+          {/* BUSINESS */}
+          <InputField
+            icon={<FaBuilding />}
+            name="businessName"
+            placeholder="Business Name"
+            value={formData.businessName}
+            onChange={handleChange}
+          />
+
+          {/* AADHAR */}
+          <InputField
+            icon={<FaIdCard />}
+            name="aadharNumber"
+            placeholder="Aadhar Number"
+            value={formData.aadharNumber}
+            onChange={handleChange}
+          />
+
+          {/* STATE */}
+          <div className="flex items-center border border-gray-300 px-3 py-3">
+            <FaMapMarkerAlt className="mr-3 text-gray-400" />
+
+            <select
+              name="state"
+              value={formData.state}
+              onChange={handleChange}
+              className="w-full outline-none text-sm bg-transparent"
+              required
+            >
+              <option value="">Select State</option>
+
+              {states.map((state, index) => (
+                <option key={index} value={state.name}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* CITY */}
+          <div className="flex items-center border border-gray-300 px-3 py-3">
+            <FaMapMarkerAlt className="mr-3 text-gray-400" />
+
+            <select
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              className="w-full outline-none text-sm bg-transparent"
+              required
+            >
+              <option value="">Select City</option>
+
+              {cities.map((city, index) => (
+                <option key={index} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* PASSWORD */}
+          <div className="sm:col-span-2 flex items-center border border-gray-300 px-3 py-3">
+            <FaLock className="mr-3 text-gray-400" />
+
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full outline-none text-sm"
+              required
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-gray-500"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+
+          {/* BUTTON */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="sm:col-span-2 bg-green-600 hover:bg-green-700 text-white py-3 font-semibold transition disabled:opacity-60"
+          >
+            {loading ? "Registering..." : "Register"}
+          </button>
+        </form>
+
+        {/* FOOTER */}
+        <p className="text-sm text-center mt-5 text-gray-600">
+          Already have an account?{" "}
+          <Link
+            to="/seller/login"
+            className="text-green-600 font-semibold hover:underline"
+          >
+            Login
+          </Link>
+        </p>
+      </motion.div>
+    </div>
+  );
+};
+
+// ================= INPUT FIELD =================
+
+const InputField = ({
+  icon,
+  name,
+  placeholder,
+  value,
+  onChange,
+}) => {
+  return (
+    <div className="flex items-center border border-gray-300 px-3 py-3">
+      <span className="mr-3 text-gray-400">
+        {icon}
+      </span>
+
+      <input
+        type="text"
+        name={name}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className="w-full outline-none text-sm"
+        required
+      />
     </div>
   );
 };

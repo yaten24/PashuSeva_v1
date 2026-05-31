@@ -1,564 +1,752 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { listProducts, listDoctors } from "../services/storage";
-import QuickActions from "../components/QuickActions";
-import PopularCategories from "../components/PopularCategories";
-import WhyPashuSeva from "../components/WhyPashuSeva";
-import { FaArrowRight, FaPhoneAlt, FaLock, FaUserMd } from "react-icons/fa";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-const CATEGORIES = [
-  { title: "Bhusa", key: "bhusa", desc: "Dry fodder listings near you" },
-  { title: "Chara", key: "chara", desc: "Green fodder sellers & rates" },
-  { title: "Feed", key: "feed", desc: "Animal feed & brands" },
+import axios from "axios";
+
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  FaArrowRight,
+  FaSearch,
+  FaBoxOpen,
+  FaUserMd,
+  FaShieldAlt,
+  FaTruck,
+} from "react-icons/fa";
+
+const categories = [
   {
-    title: "Supplements",
-    key: "supplements",
-    desc: "Minerals, vitamins, boosters",
+    title: "Animal",
+    value: "Animal",
   },
-  { title: "Others", key: "others", desc: "Other animal commodities" },
+  {
+    title: "Feed",
+    value: "Feed",
+  },
+  {
+    title: "Bhusa",
+    value: "Bhusa",
+  },
+  {
+    title: "Chara",
+    value: "Chara",
+  },
+  {
+    title: "Medicine",
+    value: "Medicine",
+  },
+  {
+    title: "Equipment",
+    value: "Equipment",
+  },
 ];
 
-const FEATURES = [
-  {
-    title: "Buy & sell nearby",
-    desc: "Category-wise marketplace + location search + call button.",
-    icon: "🛒",
-  },
-  {
-    title: "Doctor consultation",
-    desc: "Verified veterinarians list; consult by phone & keep history.",
-    icon: "👨‍⚕️",
-  },
-  {
-    title: "Premium subscription",
-    desc: "Weekly/Monthly/Quarterly plans with auto-expiry tracking.",
-    icon: "⭐",
-  },
-];
+function truncate(
+  text,
+  length = 80
+) {
+  if (!text) return "";
 
-function roleLabel(role) {
-  if (role === "buyer") return "Buyer / Farmer";
-  if (role === "seller") return "Seller";
-  if (role === "doctor") return "Animal Doctor";
-  if (role === "admin") return "Admin";
-  return "User";
+  return text.length > length
+    ? text.substring(
+        0,
+        length
+      ) + "..."
+    : text;
 }
 
-function truncate(str, n = 90) {
-  if (!str) return "";
-  return str.length > n ? str.slice(0, n - 1) + "…" : str;
-}
+const Home = () => {
+  const navigate =
+    useNavigate();
 
-function safeArr(x) {
-  return Array.isArray(x) ? x : [];
-}
+  const API =
+    "https://api.apnapashu.com";
 
-export default function Home() {
-  // const { isAuthenticated, user, isPremium } = useAuth();
-  const navigate = useNavigate();
+  const [loading, setLoading] =
+    useState(true);
 
-  const [loc, setLoc] = useState("");
-  const [cat, setCat] = useState("bhusa");
-  const [query, setQuery] = useState("");
+  const [products, setProducts] =
+    useState([]);
 
-  const allProducts = useMemo(() => safeArr(listProducts()), []);
-  const allDoctors = useMemo(() => safeArr(listDoctors()), []);
-  const isAuthenticated = false;
+  const [doctors, setDoctors] =
+    useState([]);
 
-  const latestProducts = useMemo(() => {
-    return allProducts
-      .filter((p) => p?.isActive)
-      .sort((a, b) => (b?.createdAt || 0) - (a?.createdAt || 0))
-      .slice(0, 6);
-  }, [allProducts]);
+  const [search, setSearch] =
+    useState("");
 
-  const verifiedDoctors = useMemo(() => {
-    return allDoctors
-      .filter((d) => d?.isVerified)
-      .sort((a, b) => (b?.createdAt || 0) - (a?.createdAt || 0))
-      .slice(0, 3);
-  }, [allDoctors]);
+  const [category, setCategory] =
+    useState("");
 
-  const stats = useMemo(() => {
-    const activeListings = allProducts.filter((p) => p?.isActive).length;
-    const verified = allDoctors.filter((d) => d?.isVerified).length;
+  const fetchHomeData =
+    async () => {
+      try {
+        setLoading(true);
 
-    return [
-      { label: "Active listings", value: String(activeListings) },
-      { label: "Verified doctors", value: String(verified) },
-      { label: "Premium unlocks", value: "Calls + Consults" },
-    ];
-  }, [allProducts, allDoctors]);
+        const [
+          productRes,
+          doctorRes,
+        ] =
+          await Promise.all([
+            axios.get(
+              `${API}/api/product/home-products`
+            ),
 
-  const goSearch = () => {
-    const trimmedQuery = query.trim();
+            axios.get(
+              `${API}/api/doctor/home-doctors`
+            ),
+          ]);
 
-    // ❌ Prevent empty search
-    if (!trimmedQuery && !cat) return;
+        if (
+          productRes.data.success
+        ) {
+          setProducts(
+            productRes.data
+              .products || []
+          );
+        }
 
-    // ✅ Build params
-    const params = new URLSearchParams();
+        if (
+          doctorRes.data.success
+        ) {
+          setDoctors(
+            doctorRes.data
+              .doctors || []
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (trimmedQuery) params.append("q", trimmedQuery);
-    if (cat) params.append("category", cat);
+  useEffect(() => {
+    fetchHomeData();
+  }, []);
 
-    // ✅ Redirect
-    navigate(`/search?${params.toString()}`);
-  };
+  const stats = useMemo(
+    () => [
+      {
+        title:
+          "Products",
+        value:
+          products.length,
+      },
+      {
+        title:
+          "Doctors",
+        value:
+          doctors.length,
+      },
+      {
+        title:
+          "Trusted Platform",
+        value: "100%",
+      },
+      {
+        title:
+          "Support",
+        value: "24/7",
+      },
+    ],
+    [products, doctors]
+  );
 
-  // const role = user?.role;
+  const handleSearch =
+    () => {
+      const params =
+        new URLSearchParams();
 
-  const PrimaryCTA = () => {
-    if (!isAuthenticated) {
-      return (
-        <div className="flex flex-wrap items-center gap-3 mt-6">
-          {/* 🔥 REGISTER (PRIMARY CTA) */}
-          <Link
-            to="/register"
-            className="px-6 py-3 cursor-pointer text-sm font-semibold text-emerald-900 bg-white shadow-md hover:shadow-lg hover:scale-[1.02] transition"
-          >
-            Get Started
-          </Link>
+      if (
+        search.trim()
+      ) {
+        params.append(
+          "q",
+          search
+        );
+      }
 
-          {/* 🔥 LOGIN (SECONDARY) */}
-          <Link
-            to="/login"
-            className="px-6 py-3 cursor-pointer text-sm font-semibold text-white border border-white/30 bg-white/10 backdrop-blur hover:bg-white/20 transition"
-          >
-            Login
-          </Link>
-        </div>
+      if (category) {
+        params.append(
+          "category",
+          category
+        );
+      }
+
+      navigate(
+        `/marketplace?${params.toString()}`
       );
-    }
-
-    if (role === "seller") {
-      return (
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/seller/products"
-            className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-emerald-800 hover:bg-emerald-50"
-          >
-            Manage products
-          </Link>
-          <Link
-            to="/seller/products/new"
-            className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-black"
-          >
-            Add new listing
-          </Link>
-        </div>
-      );
-    }
-
-    if (role === "doctor") {
-      return (
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/doctor/profile"
-            className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-emerald-800 hover:bg-emerald-50"
-          >
-            Complete profile
-          </Link>
-          <Link
-            to="/doctors"
-            className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-black"
-          >
-            View doctors list
-          </Link>
-        </div>
-      );
-    }
-
-    if (role === "admin") {
-      return (
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/admin"
-            className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-emerald-800 hover:bg-emerald-50"
-          >
-            Open admin panel
-          </Link>
-          <Link
-            to="/admin/doctors"
-            className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-black"
-          >
-            Verify doctors
-          </Link>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-wrap gap-2">
-        <Link
-          to="/marketplace"
-          className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-emerald-800 hover:bg-emerald-50"
-        >
-          Browse marketplace
-        </Link>
-        <Link
-          to="/premium"
-          className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-black"
-        >
-          Upgrade premium
-        </Link>
-      </div>
-    );
-  };
+    };
 
   return (
-    <div className="w-full">
-      {/* HERO: full-bleed */}
-      <section className="relative w-full bg-gradient-to-br from-emerald-900 via-emerald-700 to-green-600 overflow-hidden">
-        {/* 🔥 Background Effects */}
-        <div className="absolute -right-40 -top-40 h-[28rem] w-[28rem] bg-white/10 blur-3xl" />
-        <div className="absolute -left-40 -bottom-40 h-[30rem] w-[30rem] bg-black/10 blur-3xl" />
+    <div className="min-h-screen bg-orange-50">
 
-        <div className="w-full px-6 md:px-10 lg:px-16 py-10 md:py-12">
-          {/* 🔥 Pills */}
-          <div className="flex flex-wrap gap-3">
-            {["Marketplace", "Doctor Consultation", "Premium Plans"].map(
-              (x) => (
-                <span
-                  key={x}
-                  className="px-4 py-1.5 text-xs font-semibold text-white bg-white/10 border border-white/20"
-                >
-                  {x}
-                </span>
-              ),
-            )}
-          </div>
+      {/* HERO SECTION */}
 
-          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            {/* 🔥 LEFT */}
-            <div className="text-white">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight">
-                Smart Livestock Marketplace <br />
-                <span className="text-green-200">with Doctor Consultation</span>
+      <section className="bg-gradient-to-r from-orange-700 via-orange-600 to-amber-500">
+
+        <div className="max-w-7xl mx-auto px-4 py-14">
+
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+
+            {/* LEFT */}
+
+            <div>
+
+              <span className="inline-block px-4 py-1 text-xs font-semibold bg-white/20 text-white">
+                PashuSeva Marketplace
+              </span>
+
+              <h1 className="mt-5 text-4xl md:text-5xl font-extrabold text-white leading-tight">
+
+                Buy Products,
+                Consult Doctors &
+                Grow Your Livestock Business
+
               </h1>
 
-              <p className="mt-4 text-sm md:text-base text-white/90 max-w-xl">
-                Bhusa, Chara, Feed & Supplements easily browse karo. Verified
-                doctors se consult karo aur apni livestock services ko smart
-                banao.
+              <p className="mt-4 text-orange-100 max-w-xl">
+
+                India's modern
+                livestock marketplace
+                for farmers,
+                sellers and
+                veterinary doctors.
+
               </p>
 
-              {/* CTA */}
-              <div className="mt-6">
-                <PrimaryCTA />
+              <div className="flex flex-wrap gap-3 mt-6">
+
+                <Link
+                  to="/marketplace"
+                  className="bg-white text-orange-700 px-6 py-3 font-semibold"
+                >
+                  Explore Marketplace
+                </Link>
+
+                <Link
+                  to="/doctors"
+                  className="border border-white text-white px-6 py-3 font-semibold"
+                >
+                  Find Doctors
+                </Link>
+
               </div>
+
             </div>
 
-            {/* 🔥 RIGHT CARD */}
-            <div className="w-full max-w-md lg:ml-auto">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 shadow-xl">
-                <h3 className="text-white font-semibold text-base">
-                  Quick Search
-                </h3>
+            {/* SEARCH CARD */}
 
-                <div className="mt-4 space-y-3">
-                  {/* Category */}
-                  <select
-                    value={cat}
-                    onChange={(e) => setCat(e.target.value)}
-                    className="w-full px-3 py-2.5 text-sm bg-white text-gray-900 border border-gray-200 outline-none focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="bhusa">Bhusa</option>
-                    <option value="chara">Chara</option>
-                    <option value="feed">Feed</option>
-                    <option value="supplements">Supplements</option>
-                    <option value="others">Others</option>
-                  </select>
+            <div className="bg-white border-2 border-orange-200 p-5 shadow-xl">
 
-                  {/* Search Input */}
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && goSearch()}
-                    placeholder="Search items (e.g. cow feed, chara...)"
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 outline-none focus:ring-2 focus:ring-green-500"
-                  />
+              <h3 className="text-xl font-bold text-gray-800">
+                Quick Search
+              </h3>
 
-                  {/* Button */}
-                  <button
-                    onClick={goSearch}
-                    className="w-full bg-green-600 text-white py-2.5 text-sm font-semibold hover:bg-green-700 transition transform hover:scale-[1.02]"
-                  >
-                    Search Now
-                  </button>
-                </div>
+              <div className="mt-4 space-y-3">
+
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) =>
+                    setSearch(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Search products..."
+                  className="w-full border border-orange-200 px-4 py-3 outline-none focus:border-orange-500"
+                />
+
+                <select
+                  value={category}
+                  onChange={(e) =>
+                    setCategory(
+                      e.target.value
+                    )
+                  }
+                  className="w-full border border-orange-200 px-4 py-3 outline-none focus:border-orange-500"
+                >
+                  <option value="">
+                    Select Category
+                  </option>
+
+                  {categories.map(
+                    (item) => (
+                      <option
+                        key={
+                          item.value
+                        }
+                        value={
+                          item.value
+                        }
+                      >
+                        {
+                          item.title
+                        }
+                      </option>
+                    )
+                  )}
+                </select>
+
+                <button
+                  onClick={
+                    handleSearch
+                  }
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 font-semibold flex items-center justify-center gap-2"
+                >
+                  <FaSearch />
+                  Search Now
+                </button>
+
               </div>
+
             </div>
+
           </div>
-          {/* 🔥 STATS */}
-          {/* <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {stats.map((s) => (
+                    {/* STATS */}
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
+
+            {stats.map((item, index) => (
               <div
-                key={s.label}
+                key={index}
                 className="bg-white/10 border border-white/20 p-4"
               >
-                <div className="text-lg font-bold text-white">{s.value}</div>
-                <div className="text-xs text-white/80">{s.label}</div>
+                <h3 className="text-2xl font-bold text-white">
+                  {item.value}
+                </h3>
+
+                <p className="text-orange-100 text-sm">
+                  {item.title}
+                </p>
+
               </div>
             ))}
-          </div> */}
+
+          </div>
+
         </div>
+
       </section>
 
-      {/* Content wrapper */}
-      <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        {/* Quick actions */}
-        <QuickActions />
+      {/* CATEGORIES */}
 
-        {/* Categories */}
-        <PopularCategories />
+      <section className="max-w-7xl mx-auto px-4 py-10">
 
-        <WhyPashuSeva />
+        <div className="flex items-center justify-between mb-6">
 
-        {/* Latest listings */}
-        <section className="mt-10 px-6 md:px-10 lg:px-16">
-          {/* 🔥 HEADER */}
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
-              Latest Listings
-            </h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+            Popular Categories
+          </h2>
+
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+
+          {categories.map((item) => (
+            <div
+              key={item.value}
+              onClick={() =>
+                navigate(
+                  `/marketplace?category=${item.value}`
+                )
+              }
+              className="cursor-pointer bg-white border-2 border-orange-200 p-5 text-center hover:border-orange-500 hover:shadow-md transition"
+            >
+
+              <FaBoxOpen
+                className="mx-auto text-orange-600"
+                size={30}
+              />
+
+              <h3 className="mt-3 font-semibold text-gray-800">
+                {item.title}
+              </h3>
+
+            </div>
+          ))}
+
+        </div>
+
+      </section>
+
+      {/* LATEST PRODUCTS */}
+
+      <section className="max-w-7xl mx-auto px-4 py-4">
+
+        <div className="flex items-center justify-between mb-6">
+
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+            Latest Products
+          </h2>
+
+          <Link
+            to="/marketplace"
+            className="text-orange-600 font-semibold flex items-center gap-2"
+          >
+            View All
+            <FaArrowRight />
+          </Link>
+
+        </div>
+
+        {loading ? (
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="bg-white border-2 border-orange-100 p-4 animate-pulse"
+              >
+                <div className="h-48 bg-orange-100" />
+
+                <div className="h-4 bg-orange-100 mt-3" />
+
+                <div className="h-4 bg-orange-100 mt-2 w-2/3" />
+
+              </div>
+            ))}
+
+          </div>
+
+        ) : products.length === 0 ? (
+
+          <div className="bg-white border-2 border-orange-200 p-8 text-center">
+
+            <h3 className="font-bold text-lg">
+              No Products Found
+            </h3>
+
+          </div>
+
+        ) : (
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+
+            {products.map((product) => {
+
+              const imageUrl =
+                product.images?.length > 0
+                  ? `${API}/${product.images[0].replace(
+                      /\\/g,
+                      "/"
+                    )}`
+                  : "https://via.placeholder.com/400";
+
+              return (
+                <div
+                  key={product._id}
+                  className="bg-white border-2 border-orange-200 shadow-sm hover:shadow-lg transition"
+                >
+
+                  <div className="h-52 overflow-hidden">
+
+                    <img
+                      src={imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+
+                  </div>
+
+                  <div className="p-4">
+
+                    <div className="flex justify-between items-start gap-2">
+
+                      <h3 className="font-bold text-gray-800">
+                        {product.name}
+                      </h3>
+
+                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1">
+                        {product.category}
+                      </span>
+
+                    </div>
+
+                    <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+
+                      {truncate(
+                        product.description,
+                        70
+                      )}
+
+                    </p>
+
+                    <div className="flex justify-between items-center mt-4">
+
+                      <h3 className="text-xl font-bold text-green-600">
+                        ₹{product.price}
+                      </h3>
+
+                      <span className="text-xs text-gray-500">
+                        {product.location?.city}
+                      </span>
+
+                    </div>
+
+                    <Link
+                      to={`/product/${product._id}`}
+                      className="mt-4 bg-orange-500 hover:bg-orange-600 text-white py-2 flex justify-center items-center gap-2"
+                    >
+                      View Product
+                      <FaArrowRight />
+                    </Link>
+
+                  </div>
+
+                </div>
+              );
+            })}
+
+          </div>
+
+        )}
+      </section>
+            {/* VERIFIED DOCTORS */}
+
+      <section className="max-w-7xl mx-auto px-4 py-10">
+
+        <div className="flex items-center justify-between mb-6">
+
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+            Verified Doctors
+          </h2>
+
+          <Link
+            to="/doctors"
+            className="text-orange-600 font-semibold flex items-center gap-2"
+          >
+            View All
+            <FaArrowRight />
+          </Link>
+
+        </div>
+
+        {loading ? (
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="bg-white border-2 border-orange-100 p-5 animate-pulse"
+              >
+                <div className="w-20 h-20 bg-orange-100 mx-auto" />
+
+                <div className="h-4 bg-orange-100 mt-4" />
+
+                <div className="h-4 bg-orange-100 mt-2 w-2/3 mx-auto" />
+
+              </div>
+            ))}
+
+          </div>
+
+        ) : doctors.length === 0 ? (
+
+          <div className="bg-white border-2 border-orange-200 p-8 text-center">
+
+            <h3 className="font-bold text-lg">
+              No Verified Doctors Found
+            </h3>
+
+          </div>
+
+        ) : (
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+            {doctors.map((doctor) => {
+
+              const imageUrl =
+                doctor.profileImage
+                  ? `${API}/${doctor.profileImage.replace(
+                      /\\/g,
+                      "/"
+                    )}`
+                  : null;
+
+              return (
+                <div
+                  key={doctor._id}
+                  className="bg-white border-2 border-orange-200 p-5 shadow-sm hover:shadow-lg transition"
+                >
+
+                  <div className="text-center">
+
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={doctor.name}
+                        className="w-24 h-24 object-cover mx-auto border-2 border-orange-200"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 mx-auto bg-orange-100 flex items-center justify-center">
+                        <FaUserMd
+                          size={36}
+                          className="text-orange-600"
+                        />
+                      </div>
+                    )}
+
+                    <h3 className="font-bold text-lg mt-4 text-gray-800">
+                      {doctor.name}
+                    </h3>
+
+                    <p className="text-sm text-gray-500 mt-1">
+                      {doctor.specialization ||
+                        "Veterinary Doctor"}
+                    </p>
+
+                    <p className="text-sm text-gray-500 mt-1">
+                      Experience:
+                      {" "}
+                      {doctor.experienceYears || 0}
+                      {" "}
+                      Years
+                    </p>
+
+                    <span className="inline-block mt-3 bg-green-100 text-green-700 text-xs px-3 py-1">
+                      Verified Doctor
+                    </span>
+
+                    <Link
+                      to={`/doctor/${doctor._id}`}
+                      className="mt-4 bg-orange-500 hover:bg-orange-600 text-white py-2 flex justify-center items-center gap-2"
+                    >
+                      Book Appointment
+                    </Link>
+
+                  </div>
+
+                </div>
+              );
+            })}
+
+          </div>
+
+        )}
+
+      </section>
+
+      {/* WHY PASHUSEVA */}
+
+      <section className="max-w-7xl mx-auto px-4 py-10">
+
+        <div className="text-center mb-8">
+
+          <h2 className="text-3xl font-bold text-gray-800">
+            Why Choose PashuSeva?
+          </h2>
+
+          <p className="text-gray-500 mt-2">
+            Everything you need for your livestock business in one platform.
+          </p>
+
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+          <div className="bg-white border-2 border-orange-200 p-6 text-center">
+
+            <FaShieldAlt
+              size={40}
+              className="mx-auto text-orange-600"
+            />
+
+            <h3 className="font-bold mt-4">
+              Trusted Platform
+            </h3>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Verified sellers and doctors for secure transactions.
+            </p>
+
+          </div>
+
+          <div className="bg-white border-2 border-orange-200 p-6 text-center">
+
+            <FaUserMd
+              size={40}
+              className="mx-auto text-orange-600"
+            />
+
+            <h3 className="font-bold mt-4">
+              Verified Doctors
+            </h3>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Book appointments with experienced veterinary doctors.
+            </p>
+
+          </div>
+
+          <div className="bg-white border-2 border-orange-200 p-6 text-center">
+
+            <FaTruck
+              size={40}
+              className="mx-auto text-orange-600"
+            />
+
+            <h3 className="font-bold mt-4">
+              Easy Marketplace
+            </h3>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Buy and sell livestock products easily across India.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* CTA */}
+
+      <section className="max-w-7xl mx-auto px-4 pb-12">
+
+        <div className="bg-gradient-to-r from-orange-600 to-orange-500 p-8 text-center">
+
+          <h2 className="text-3xl font-bold text-white">
+            Ready to Grow Your Livestock Business?
+          </h2>
+
+          <p className="text-orange-100 mt-3">
+            Join thousands of farmers, sellers and doctors on PashuSeva.
+          </p>
+
+          <div className="flex flex-wrap justify-center gap-4 mt-6">
+
+            <Link
+              to="/register"
+              className="bg-white text-orange-700 px-6 py-3 font-semibold"
+            >
+              Get Started
+            </Link>
 
             <Link
               to="/marketplace"
-              className="flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:gap-3 transition-all"
+              className="border border-white text-white px-6 py-3 font-semibold"
             >
-              <span>Open marketplace</span>
-              <FaArrowRight className="text-xs" />
+              Browse Marketplace
             </Link>
+
           </div>
 
-          {/* 🔥 EMPTY STATE */}
-          {latestProducts.length === 0 ? (
-            <div className="mt-6 border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-sm">
-              No listings yet. Sellers can add products from{" "}
-              <Link
-                to="/seller/products"
-                className="font-semibold text-emerald-600 hover:underline"
-              >
-                My Products
-              </Link>
-              .
-            </div>
-          ) : (
-            /* 🔥 GRID */
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {latestProducts.map((p) => (
-                <div
-                  key={p.id}
-                  className="group border border-gray-200 bg-white p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-                >
-                  {/* 🔥 TOP */}
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-emerald-600 transition">
-                      {p?.name || "Product"}
-                    </h3>
+        </div>
 
-                    <span className="text-[11px] font-semibold text-gray-700 bg-gray-100 px-2 py-0.5">
-                      {String(p?.category || "").toUpperCase()}
-                    </span>
-                  </div>
+      </section>
 
-                  {/* 🔥 PRICE + LOCATION */}
-                  <div className="mt-2 text-sm text-gray-600">
-                    {p?.location || "—"} •{" "}
-                    <span className="font-bold text-emerald-600">
-                      ₹{p?.price ?? "—"}
-                    </span>
-                  </div>
-
-                  {/* 🔥 DESC */}
-                  <p className="mt-3 text-sm text-gray-600 leading-relaxed">
-                    {truncate(p?.description || "No description.")}
-                  </p>
-
-                  {/* 🔥 ACTIONS */}
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    {/* View */}
-                    <Link
-                      to={`/product/${p.id}`}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-gray-900 text-white hover:bg-black transition"
-                    >
-                      View
-                      <FaArrowRight className="text-xs" />
-                    </Link>
-
-                    {/* Premium / Call */}
-                    {/* {!isPremium ? (
-                      <Link
-                        to="/premium"
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-sky-600 text-white hover:bg-sky-700 transition"
-                      >
-                        <FaLock className="text-xs" />
-                        Unlock Call
-                      </Link>
-                    ) : (
-                      <a
-                        href={`tel:${p?.contactNumber || ""}`}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition"
-                      >
-                        <FaPhoneAlt className="text-xs" />
-                        Call Seller
-                      </a>
-                    )} */}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Verified doctors */}
-
-        <section className="mt-10 px-6 md:px-10 lg:px-16">
-          {/* 🔥 HEADER */}
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
-              Verified Doctors
-            </h2>
-
-            <Link
-              to="/doctors"
-              className="flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:gap-3 transition-all"
-            >
-              <span>See all</span>
-              <FaArrowRight className="text-xs" />
-            </Link>
-          </div>
-
-          {/* 🔥 EMPTY STATE */}
-          {verifiedDoctors.length === 0 ? (
-            <div className="mt-6 border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-sm">
-              No verified doctors yet. Doctors can submit profile from{" "}
-              <Link
-                to="/doctor/profile"
-                className="font-semibold text-emerald-600 hover:underline"
-              >
-                Doctor Profile
-              </Link>
-              .
-            </div>
-          ) : (
-            /* 🔥 GRID */
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {verifiedDoctors.map((d) => (
-                <div
-                  key={d.id}
-                  className="group border border-gray-200 bg-white p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-                >
-                  {/* 🔥 TOP */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 flex items-center justify-center bg-emerald-100 text-emerald-700 group-hover:scale-110 transition">
-                        <FaUserMd />
-                      </div>
-
-                      <h3 className="text-lg font-bold text-gray-900 group-hover:text-emerald-600 transition">
-                        {d?.name || "Doctor"}
-                      </h3>
-                    </div>
-
-                    <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5">
-                      Verified
-                    </span>
-                  </div>
-
-                  {/* 🔥 DETAILS */}
-                  <div className="mt-3 text-sm text-gray-600">
-                    {d?.qualification || "—"} • {d?.specialization || "—"} •{" "}
-                    {d?.experienceYears ?? "—"} yrs
-                  </div>
-
-                  {/* 🔥 ACTIONS */}
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    {/* {!isPremium ? (
-                      <Link
-                        to="/premium"
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-sky-600 text-white hover:bg-sky-700 transition"
-                      >
-                        <FaLock className="text-xs" />
-                        Unlock Consult
-                      </Link>
-                    ) : (
-                      <a
-                        href={`tel:${d?.phone || ""}`}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition"
-                      >
-                        <FaPhoneAlt className="text-xs" />
-                        Call Doctor
-                      </a>
-                    )} */}
-
-                    <Link
-                      to="/doctors"
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-semibold border border-gray-300 bg-white hover:bg-gray-50 transition"
-                    >
-                      View list
-                      <FaArrowRight className="text-xs" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Bottom CTA */}
-        {/* <section className="mt-10 rounded-3xl border border-gray-200 bg-gradient-to-r from-emerald-50 to-cyan-50 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="text-lg font-extrabold text-gray-900">
-                Premium = Full access
-              </div>
-              <div className="mt-1 text-sm text-gray-600">
-                Unlimited calls + consultations, with auto-expiry tracking.
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Link
-                to="/premium"
-                className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-black"
-              >
-                View plans
-              </Link>
-              <Link
-                to="/dashboard"
-                className="rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-extrabold text-gray-900 hover:bg-gray-50"
-              >
-                My dashboard
-              </Link>
-            </div>
-          </div>
-        </section> */}
-      </div>
     </div>
   );
-}
+};
 
-function QuickAction({ icon, title, desc, to }) {
-  return (
-    <Link
-      to={to}
-      className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm hover:bg-gray-50"
-    >
-      <div className="flex items-center gap-3">
-        <div className="grid h-11 w-11 place-items-center rounded-2xl border border-gray-200 bg-gradient-to-br from-cyan-50 to-emerald-50 text-lg">
-          {icon}
-        </div>
-        <div className="min-w-0">
-          <div className="text-base font-extrabold text-gray-900">{title}</div>
-          <div className="mt-1 text-sm text-gray-600">{desc}</div>
-        </div>
-      </div>
-      <div className="mt-3 text-sm font-extrabold text-emerald-700">Open →</div>
-    </Link>
-  );
-}
+export default Home;

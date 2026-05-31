@@ -188,7 +188,7 @@ const DoctorHome = () => {
       </section>
 
       {/* 🔥 FINAL CTA */}
-      <section className="px-6 md:px-16 py-20 text-center bg-gradient-to-r from-green-600 to-blue-600 text-white">
+      {/* <section className="px-6 md:px-16 py-20 text-center bg-gradient-to-r from-green-600 to-blue-600 text-white">
         <h2 className="text-3xl md:text-4xl font-bold">
           Start Your Journey Today 🚀
         </h2>
@@ -206,7 +206,7 @@ const DoctorHome = () => {
             Login
           </Link>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };

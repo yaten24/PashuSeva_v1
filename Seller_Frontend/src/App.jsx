@@ -10,6 +10,8 @@ import SellerProfile from "./Pages/SellerProfilePage";
 import ProtectedRoute from "./route/ProtectedRoute";
 import PublicRoute from "./route/PublicRoute";
 import ComingSoon from "./Pages/ComingSoon";
+import SellerProducts from "./Pages/SellerProducts";
+import SellerOrders from "./Pages/SellerOrders";
 
 // 🔹 Seller Pages
 
@@ -56,7 +58,7 @@ const App = () => {
             path="/seller/products"
             element={
               <ProtectedRoute>
-                <ComingSoon />
+                <SellerProducts />
               </ProtectedRoute>
             }
           />
@@ -64,7 +66,7 @@ const App = () => {
             path="/seller/orders"
             element={
               <ProtectedRoute>
-                <ComingSoon />
+                <SellerOrders />
               </ProtectedRoute>
             }
           />
