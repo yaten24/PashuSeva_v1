@@ -257,7 +257,7 @@ export default function Login() {
               {loading ? "Logging in..." : "Login"}
             </motion.button>
 
-            <button
+            {/* <button
               type="button"
               className="w-full border border-gray-200 py-3 flex items-center justify-center gap-2 hover:bg-gray-50 transition text-sm font-semibold"
             >
@@ -267,7 +267,7 @@ export default function Login() {
                 alt="google"
               />
               Continue with Google
-            </button>
+            </button> */}
 
             <div className="flex justify-between text-sm pt-1">
               <Link

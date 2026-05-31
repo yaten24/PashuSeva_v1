@@ -128,7 +128,7 @@ const SellerLogin = () => {
             </button>
           </div>
 
-          {/* FORGOT PASSWORD */}
+          {/* FORGOT PASSWORD
           <div className="flex justify-end">
             <Link
               to="/seller/forgot-password"
@@ -136,7 +136,7 @@ const SellerLogin = () => {
             >
               Forgot Password?
             </Link>
-          </div>
+          </div> */}
 
           {/* BUTTON */}
           <button

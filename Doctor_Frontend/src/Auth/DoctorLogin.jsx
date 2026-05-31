@@ -278,7 +278,7 @@ const DoctorLogin = () => {
             </div>
           </motion.div>
 
-          {/* FORGOT PASSWORD */}
+          {/* FORGOT PASSWORD
           <motion.div
             variants={item}
             className="flex justify-end"
@@ -289,7 +289,7 @@ const DoctorLogin = () => {
             >
               Forgot Password?
             </Link>
-          </motion.div>
+          </motion.div> */}
 
           {/* BUTTON */}
           <motion.button
