@@ -220,6 +220,7 @@ export const loginDoctorController = async (req, res) => {
 
     // 🔹 6. Send Response
     res.status(200).json({
+      success: true,
       message: "Doctor login successful",
       doctor: {
         id: doctor._id,
