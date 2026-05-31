@@ -29,38 +29,150 @@ const DoctorLogin = () => {
 
   // ================= HANDLE SUBMIT =================
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      return toast.error("Please fill all fields");
+  if (loading) return;
+
+  const email = formData?.email?.trim();
+  const password = formData?.password?.trim();
+
+  // Required Fields
+  if (!email) {
+    return toast.error(
+      "Email is required"
+    );
+  }
+
+  if (!password) {
+    return toast.error(
+      "Password is required"
+    );
+  }
+
+  // Email Validation
+  const emailRegex =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    return toast.error(
+      "Please enter a valid email address"
+    );
+  }
+
+  // Password Validation
+  if (password.length < 6) {
+    return toast.error(
+      "Password must be at least 6 characters"
+    );
+  }
+
+  try {
+    setLoading(true);
+
+    const payload = {
+      email,
+      password,
+    };
+
+    const res =
+      await loginDoctor(payload);
+
+    if (!res) {
+      return toast.error(
+        "No response from server"
+      );
     }
 
-    try {
-      setLoading(true);
+    if (res.success) {
+      toast.success(
+        res.message ||
+          "Login Successful"
+      );
 
-      const res = await loginDoctor(formData);
-
-      console.log(res);
-
-      if (res?.success) {
-        toast.success("Login Successful");
-
-        navigate("/doctor/dashboard");
-      } else {
-        toast.error(res?.message || "Login failed");
+      // Optional Local Storage
+      if (res.doctor) {
+        localStorage.setItem(
+          "doctor",
+          JSON.stringify(
+            res.doctor
+          )
+        );
       }
-    } catch (error) {
-      console.log(error);
 
+      navigate(
+        "/doctor/dashboard"
+      );
+
+      return;
+    }
+
+    toast.error(
+      res.message ||
+        "Invalid email or password"
+    );
+
+  } catch (error) {
+    console.error(
+      "Doctor Login Error:",
+      error
+    );
+
+    if (
+      error?.response?.status ===
+      400
+    ) {
       toast.error(
-        error?.response?.data?.message ||
+        error?.response?.data
+          ?.message ||
+          "Invalid request"
+      );
+    } else if (
+      error?.response?.status ===
+      401
+    ) {
+      toast.error(
+        "Invalid email or password"
+      );
+    } else if (
+      error?.response?.status ===
+      403
+    ) {
+      toast.error(
+        "Account access denied"
+      );
+    } else if (
+      error?.response?.status ===
+      404
+    ) {
+      toast.error(
+        "Doctor account not found"
+      );
+    } else if (
+      error?.response?.status >=
+      500
+    ) {
+      toast.error(
+        "Server error. Please try again later."
+      );
+    } else if (
+      error?.code ===
+      "ERR_NETWORK"
+    ) {
+      toast.error(
+        "Network error. Check your internet connection."
+      );
+    } else {
+      toast.error(
+        error?.response?.data
+          ?.message ||
           error?.message ||
           "Something went wrong"
       );
-    } finally {
-      setLoading(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ================= ANIMATION =================
   const container = {

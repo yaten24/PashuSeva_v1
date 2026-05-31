@@ -74,7 +74,7 @@ const SellerDashboard = () => {
         </div>
 
         {/* STATS */}
-
+{/* 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
 
           <div className="bg-white border-2 border-orange-200 p-4 shadow-sm">
@@ -122,7 +122,7 @@ const SellerDashboard = () => {
 
           </div>
 
-        </div>
+        </div> */}
 
         {/* QUICK ACTIONS */}
 
@@ -164,7 +164,7 @@ const SellerDashboard = () => {
               Orders
             </button>
 
-            <button
+            {/* <button
               onClick={() =>
                 navigate("/seller/withdraw")
               }
@@ -172,7 +172,7 @@ const SellerDashboard = () => {
             >
               <FaWallet />
               Withdraw
-            </button>
+            </button> */}
 
           </div>
 
